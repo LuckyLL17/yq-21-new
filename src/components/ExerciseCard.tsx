@@ -1,7 +1,8 @@
 import type { Snack } from '../data/snacks';
 import type { Exercise, ExerciseIntensity } from '../data/exercises';
 import { getIntensityLabel } from '../data/exercises';
-import { getExerciseComparison, formatEnergy, type EnergyUnit } from '../utils/calculator';
+import { getExerciseComparison } from '../utils/exercise';
+import { formatEnergy, type EnergyUnit } from '../utils/energy';
 import { Info } from 'lucide-react';
 
 interface ExerciseCardProps {

@@ -3,7 +3,7 @@ import { Search, Plus, Minus, X, Check } from 'lucide-react';
 import type { Snack } from '../data/snacks';
 import { snacks, findSnackByName } from '../data/snacks';
 import { addRecordFromSnack } from '../data/records';
-import { getCaloriesLevel } from '../utils/calculator';
+import { getCaloriesLevel } from '../utils/snack';
 
 interface RecordFormProps {
   onRecordAdded?: () => void;

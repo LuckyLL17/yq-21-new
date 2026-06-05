@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Flame, Heart } from 'lucide-react';
 import type { Snack } from '../data/snacks';
 import { getTagInfo } from '../data/snacks';
-import { getCaloriesLevel } from '../utils/calculator';
+import { getCaloriesLevel } from '../utils/snack';
 import { useFavorites } from '../utils/useFavorites';
 import { useCustomTags } from '../utils/useCustomTags';
 

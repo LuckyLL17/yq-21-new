@@ -5,7 +5,7 @@ import { ExerciseRecordForm } from '../components/ExerciseRecordForm';
 import { DailyReport } from '../components/DailyReport';
 import { CalendarHeatmap } from '../components/CalendarHeatmap';
 import { RecordList } from '../components/RecordList';
-import type { EnergyUnit } from '../utils/calculator';
+import type { EnergyUnit } from '../utils/energy';
 
 type ViewMode = 'split' | 'calendar';
 type RecordType = 'food' | 'exercise';

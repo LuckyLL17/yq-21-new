@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { Target, Clock, Flame, Dumbbell, ChevronDown, ChevronUp, Zap, Leaf, Sparkles, Info } from 'lucide-react';
-import { generateExercisePlans, formatTime, getWeightOptions, type ExercisePlan, formatEnergy, type EnergyUnit, getEnergyRangeDescription, ERROR_MARGIN_DESCRIPTION } from '../utils/calculator';
+import { generateExercisePlans, type ExercisePlan } from '../utils/exercisePlan';
+import { formatTime } from '../utils/exercise';
+import { getWeightOptions } from '../utils/constants';
+import { formatEnergy, type EnergyUnit, getEnergyRangeDescription } from '../utils/energy';
+import { ERROR_MARGIN_DESCRIPTION } from '../utils/constants';
 import { getIntensityLabel } from '../data/exercises';
 
 const difficultyConfig = {

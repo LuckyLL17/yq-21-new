@@ -20,7 +20,7 @@ import {
   deleteRecord,
   getRecordsByDateRange,
 } from '../data/records';
-import { getCaloriesLevel } from '../utils/calculator';
+import { getCaloriesLevel } from '../utils/snack';
 
 interface RecordListProps {
   date?: string;

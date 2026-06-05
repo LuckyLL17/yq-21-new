@@ -5,7 +5,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import html2canvas from 'html2canvas';
 import { getSnackById, getAlternatives, TAG_INFO, getTagInfo, type AlternativeRecommendation } from '../data/snacks';
 import { getAllExercises, getIntensityLabel, type ExerciseIntensity } from '../data/exercises';
-import { getCaloriesLevel, getWeightOptions, kcalToKj, type EnergyUnit, ERROR_MARGIN_DESCRIPTION } from '../utils/calculator';
+import { getCaloriesLevel } from '../utils/snack';
+import { getWeightOptions } from '../utils/constants';
+import { kcalToKj, type EnergyUnit } from '../utils/energy';
+import { ERROR_MARGIN_DESCRIPTION } from '../utils/constants';
 import { ExerciseCard } from '../components/ExerciseCard';
 import { AlternativeCard } from '../components/AlternativeCard';
 import { useBrowsingHistory } from '../utils/useBrowsingHistory';

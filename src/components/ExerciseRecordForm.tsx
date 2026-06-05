@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Dumbbell, Plus, Minus, Check, Flame } from 'lucide-react';
 import { getAllExercises, getIntensityLabel, type Exercise, type ExerciseIntensity } from '../data/exercises';
 import { addExerciseRecord } from '../data/records';
-import { calculateCaloriesBurned, formatEnergy, type EnergyUnit, getEnergyRangeDescription, getWeightOptions } from '../utils/calculator';
+import { calculateCaloriesBurned } from '../utils/exercise';
+import { formatEnergy, type EnergyUnit, getEnergyRangeDescription } from '../utils/energy';
+import { getWeightOptions } from '../utils/constants';
 
 interface ExerciseRecordFormProps {
   onRecordAdded?: () => void;

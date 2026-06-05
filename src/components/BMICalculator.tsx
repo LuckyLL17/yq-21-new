@@ -4,9 +4,9 @@ import {
   calculateBMI,
   getBMICategory,
   getIdealWeightRange,
-  getSnackCalorieLimit,
   type BMIResult
-} from '../utils/calculator';
+} from '../utils/bmi';
+import { getSnackCalorieLimit } from '../utils/snack';
 import { snacks } from '../data/snacks';
 import { useNavigate } from 'react-router-dom';
 

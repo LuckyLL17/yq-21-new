@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Heart, Apple, Dumbbell, Moon, Droplets, Leaf } from 'lucide-react';
 import { BMICalculator } from '../components/BMICalculator';
 import { HealthTipsCarousel } from '../components/HealthTipsCarousel';
-import { getHealthTipByIndex } from '../utils/calculator';
+import { getHealthTipByIndex } from '../utils/health';
 
 export function Health() {
   const [activeTab, setActiveTab] = useState<'bmi' | 'tips' | 'knowledge'>('bmi');

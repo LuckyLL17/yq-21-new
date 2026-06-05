@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 import type { DailySummary } from '../data/records';
 import { getDailySummary } from '../data/records';
-import { getCaloriesLevel, formatEnergy, type EnergyUnit } from '../utils/calculator';
+import { getCaloriesLevel } from '../utils/snack';
+import { formatEnergy, type EnergyUnit } from '../utils/energy';
 
 interface DailyReportProps {
   date?: string;

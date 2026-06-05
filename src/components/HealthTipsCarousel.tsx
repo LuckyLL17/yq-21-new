@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getHealthTipByIndex, getHealthTipsCount } from '../utils/calculator';
+import { getHealthTipByIndex, getHealthTipsCount } from '../utils/health';
 
 interface HealthTipsCarouselProps {
   autoPlay?: boolean;
