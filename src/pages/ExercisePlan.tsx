@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Target, Clock, Flame, Dumbbell, ChevronDown, ChevronUp, Zap, Leaf, Sparkles } from 'lucide-react';
-import { generateExercisePlans, formatTime, getWeightOptions, type ExercisePlan } from '../utils/calculator';
+import { Target, Clock, Flame, Dumbbell, ChevronDown, ChevronUp, Zap, Leaf, Sparkles, Info } from 'lucide-react';
+import { generateExercisePlans, formatTime, getWeightOptions, type ExercisePlan, formatEnergy, type EnergyUnit, getEnergyRangeDescription, ERROR_MARGIN_DESCRIPTION } from '../utils/calculator';
+import { getIntensityLabel } from '../data/exercises';
 
 const difficultyConfig = {
   easy: { label: '简单', color: 'bg-green-100 text-green-700', icon: Leaf },
@@ -18,6 +19,7 @@ const planIcons: Record<string, typeof Dumbbell> = {
 export function ExercisePlan() {
   const [targetCalories, setTargetCalories] = useState<number>(300);
   const [weight, setWeight] = useState<number>(65);
+  const [energyUnit, setEnergyUnit] = useState<EnergyUnit>('kcal');
   const [plans, setPlans] = useState<ExercisePlan[]>([]);
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const [hasGenerated, setHasGenerated] = useState(false);
@@ -67,8 +69,32 @@ export function ExercisePlan() {
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  目标消耗热量（千卡）
+                  目标消耗热量
                 </label>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-1">
+                    <button
+                      onClick={() => setEnergyUnit('kcal')}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                        energyUnit === 'kcal'
+                          ? 'bg-white text-primary-600 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      千卡
+                    </button>
+                    <button
+                      onClick={() => setEnergyUnit('kJ')}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                        energyUnit === 'kJ'
+                          ? 'bg-white text-primary-600 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      千焦
+                    </button>
+                  </div>
+                </div>
                 <div className="flex flex-wrap gap-2 mb-3">
                   {calorieOptions.map((cal) => (
                     <button
@@ -80,14 +106,19 @@ export function ExercisePlan() {
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                      {cal}
+                      {energyUnit === 'kJ' ? Math.round(cal * 4.184) : cal}
                     </button>
                   ))}
                 </div>
                 <input
                   type="number"
-                  value={targetCalories}
-                  onChange={(e) => setTargetCalories(Math.max(50, Number(e.target.value) || 0))}
+                  value={energyUnit === 'kJ' ? Math.round(targetCalories * 4.184) : targetCalories}
+                  onChange={(e) => {
+                    const val = Number(e.target.value) || 0;
+                    setTargetCalories(
+                      Math.max(50, energyUnit === 'kJ' ? Math.round(val / 4.184) : val)
+                    );
+                  }}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                   placeholder="或输入自定义热量"
                   min="50"
@@ -174,7 +205,7 @@ export function ExercisePlan() {
                               </span>
                               <span className="inline-flex items-center gap-1.5 text-sm text-gray-600">
                                 <Flame className="w-4 h-4" />
-                                约 {plan.totalCalories} 千卡
+                                约 {formatEnergy(plan.totalCalories, energyUnit)}
                               </span>
                             </div>
                           </div>
@@ -209,15 +240,17 @@ export function ExercisePlan() {
                                       {item.exercise.name}
                                     </p>
                                     <p className="text-sm text-gray-500">
-                                      {item.minutes} {item.exercise.unit}
+                                      {item.minutes} {item.exercise.unit} · {getIntensityLabel(item.intensity)}
                                     </p>
                                   </div>
                                 </div>
                                 <div className="text-right">
                                   <p className="font-semibold text-primary-600">
-                                    +{item.caloriesBurned}
+                                    +{formatEnergy(item.caloriesBurned, energyUnit)}
                                   </p>
-                                  <p className="text-xs text-gray-500">千卡</p>
+                                  <p className="text-xs text-gray-500">
+                                    {getEnergyRangeDescription(item.caloriesBurned, energyUnit)}
+                                  </p>
                                 </div>
                               </div>
                             );
@@ -232,7 +265,10 @@ export function ExercisePlan() {
                                 {formatTime(plan.totalMinutes)}
                               </p>
                               <p className="text-sm text-primary-600 font-medium">
-                                消耗 {plan.totalCalories} 千卡
+                                消耗 {formatEnergy(plan.totalCalories, energyUnit)}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                误差范围：{getEnergyRangeDescription(plan.totalCalories, energyUnit)}
                               </p>
                             </div>
                           </div>
@@ -251,12 +287,17 @@ export function ExercisePlan() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-3xl p-8 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-            <div className="relative">
-              <h3 className="font-poppins text-2xl font-bold mb-3">温馨提示</h3>
-              <p className="text-white/80 leading-relaxed">
-                运动消耗计算基于MET（代谢当量）公式，实际消耗可能因个人体质、运动强度、环境因素等有所差异。
-                建议运动前做好热身，根据自身情况合理调整运动强度。如有健康问题，请先咨询专业医生。
-              </p>
+            <div className="relative flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                <Info className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-poppins text-2xl font-bold mb-3">温馨提示</h3>
+                <p className="text-white/80 leading-relaxed">
+                  {ERROR_MARGIN_DESCRIPTION}
+                  建议运动前做好热身，根据自身情况合理调整运动强度。如有健康问题，请先咨询专业医生。
+                </p>
+              </div>
             </div>
           </div>
         </div>

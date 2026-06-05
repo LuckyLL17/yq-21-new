@@ -1,17 +1,22 @@
 import { useState } from 'react';
-import { Calendar, LayoutGrid, Flame, History, X } from 'lucide-react';
+import { Calendar, LayoutGrid, Flame, History, X, Dumbbell, UtensilsCrossed } from 'lucide-react';
 import { RecordForm } from '../components/RecordForm';
+import { ExerciseRecordForm } from '../components/ExerciseRecordForm';
 import { DailyReport } from '../components/DailyReport';
 import { CalendarHeatmap } from '../components/CalendarHeatmap';
 import { RecordList } from '../components/RecordList';
+import type { EnergyUnit } from '../utils/calculator';
 
 type ViewMode = 'split' | 'calendar';
+type RecordType = 'food' | 'exercise';
 
 export function Records() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   );
   const [viewMode, setViewMode] = useState<ViewMode>('split');
+  const [recordType, setRecordType] = useState<RecordType>('food');
+  const [energyUnit, setEnergyUnit] = useState<EnergyUnit>('kcal');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [showRecordList, setShowRecordList] = useState(false);
 
@@ -23,7 +28,7 @@ export function Records() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 flex-wrap gap-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
                 <Flame className="w-6 h-6 text-white" />
@@ -32,15 +37,64 @@ export function Records() {
                 <h1 className="font-poppins text-3xl font-bold text-gray-800">
                   热量记录
                 </h1>
-                <p className="text-gray-500">记录你的热量摄入，追踪健康饮食</p>
+                <p className="text-gray-500">记录你的热量摄入与消耗，追踪健康饮食</p>
               </div>
             </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setEnergyUnit('kcal')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                    energyUnit === 'kcal'
+                      ? 'bg-white text-primary-600 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  千卡
+                </button>
+                <button
+                  onClick={() => setEnergyUnit('kJ')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                    energyUnit === 'kJ'
+                      ? 'bg-white text-primary-600 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  千焦
+                </button>
+              </div>
+              <button
+                onClick={() => setShowRecordList(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-lg font-medium hover:from-primary-600 hover:to-accent-600 transition-all shadow-md"
+              >
+                <History className="w-4 h-4" />
+                查看历史记录
+              </button>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2 mb-6">
             <button
-              onClick={() => setShowRecordList(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-lg font-medium hover:from-primary-600 hover:to-accent-600 transition-all shadow-md"
+              onClick={() => setRecordType('food')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                recordType === 'food'
+                  ? 'bg-primary-500 text-white shadow-md'
+                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              }`}
             >
-              <History className="w-4 h-4" />
-              查看历史记录
+              <UtensilsCrossed className="w-4 h-4" />
+              饮食摄入
+            </button>
+            <button
+              onClick={() => setRecordType('exercise')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                recordType === 'exercise'
+                  ? 'bg-green-500 text-white shadow-md'
+                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              <Dumbbell className="w-4 h-4" />
+              运动消耗
             </button>
           </div>
         </div>
@@ -73,11 +127,16 @@ export function Records() {
         {viewMode === 'split' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6">
-              <RecordForm onRecordAdded={handleRecordAdded} />
+              {recordType === 'food' ? (
+                <RecordForm onRecordAdded={handleRecordAdded} />
+              ) : (
+                <ExerciseRecordForm onRecordAdded={handleRecordAdded} energyUnit={energyUnit} />
+              )}
               <DailyReport
                 date={selectedDate}
                 onDateChange={setSelectedDate}
                 refreshTrigger={refreshTrigger}
+                energyUnit={energyUnit}
               />
             </div>
             <div className="lg:col-span-2">
@@ -93,11 +152,16 @@ export function Records() {
         {viewMode === 'calendar' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6">
-              <RecordForm onRecordAdded={handleRecordAdded} />
+              {recordType === 'food' ? (
+                <RecordForm onRecordAdded={handleRecordAdded} />
+              ) : (
+                <ExerciseRecordForm onRecordAdded={handleRecordAdded} energyUnit={energyUnit} />
+              )}
               <DailyReport
                 date={selectedDate}
                 onDateChange={setSelectedDate}
                 refreshTrigger={refreshTrigger}
+                energyUnit={energyUnit}
               />
             </div>
             <div className="lg:col-span-2">

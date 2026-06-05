@@ -1,16 +1,68 @@
 import type { Snack } from '../data/snacks';
-import type { Exercise } from '../data/exercises';
+import type { Exercise, ExerciseIntensity } from '../data/exercises';
 import { getAllExercises } from '../data/exercises';
 
 const DEFAULT_WEIGHT = 65;
+const DEFAULT_INTENSITY: ExerciseIntensity = 'medium';
+const ERROR_MARGIN = 0.15;
+const CALORIES_TO_KJ = 4.184;
+
+export type EnergyUnit = 'kcal' | 'kJ';
+
+export function kcalToKj(kcal: number): number {
+  return kcal * CALORIES_TO_KJ;
+}
+
+export function kJToKcal(kj: number): number {
+  return kj / CALORIES_TO_KJ;
+}
+
+export function formatEnergy(value: number, unit: EnergyUnit = 'kcal'): string {
+  if (unit === 'kJ') {
+    return `${Math.round(kcalToKj(value))} 千焦`;
+  }
+  return `${Math.round(value)} 千卡`;
+}
+
+export function getCaloriesBurnedRange(calories: number): { min: number; max: number } {
+  return {
+    min: Math.round(calories * (1 - ERROR_MARGIN)),
+    max: Math.round(calories * (1 + ERROR_MARGIN))
+  };
+}
+
+export function getEnergyRangeDescription(calories: number, unit: EnergyUnit = 'kcal'): string {
+  const range = getCaloriesBurnedRange(calories);
+  if (unit === 'kJ') {
+    return `${Math.round(kcalToKj(range.min))} - ${Math.round(kcalToKj(range.max))} 千焦`;
+  }
+  return `${range.min} - ${range.max} 千卡`;
+}
+
+export function getMetValue(exercise: Exercise, intensity: ExerciseIntensity = DEFAULT_INTENSITY): number {
+  return exercise.metValues[intensity];
+}
 
 export function calculateExerciseTime(
   calories: number,
-  metValue: number,
+  exercise: Exercise,
+  intensity: ExerciseIntensity = DEFAULT_INTENSITY,
   weight: number = DEFAULT_WEIGHT
 ): number {
+  const metValue = getMetValue(exercise, intensity);
   const caloriesPerMinute = (metValue * 3.5 * weight) / 200;
   return Math.ceil(calories / caloriesPerMinute);
+}
+
+export function calculateCaloriesBurned(
+  exercise: Exercise,
+  minutes: number,
+  intensity: ExerciseIntensity = DEFAULT_INTENSITY,
+  weight: number = DEFAULT_WEIGHT
+): number {
+  const metValue = getMetValue(exercise, intensity);
+  const caloriesPerMinute = (metValue * 3.5 * weight) / 200;
+  return Math.round(minutes * caloriesPerMinute);
 }
 
 export function formatTime(minutes: number): string {
@@ -28,13 +80,22 @@ export function formatTime(minutes: number): string {
 export function getExerciseComparison(
   snack: Snack,
   exercise: Exercise,
-  weight: number = DEFAULT_WEIGHT
-): { minutes: number; formatted: string; description: string } {
-  const minutes = calculateExerciseTime(snack.calories, exercise.metValue, weight);
+  weight: number = DEFAULT_WEIGHT,
+  intensity: ExerciseIntensity = DEFAULT_INTENSITY
+): {
+  minutes: number;
+  formatted: string;
+  description: string;
+  caloriesBurned: number;
+  caloriesRange: { min: number; max: number };
+} {
+  const minutes = calculateExerciseTime(snack.calories, exercise, intensity, weight);
   const formatted = formatTime(minutes);
   const description = `${snack.servingSize}${snack.name} = ${exercise.name}${formatted}`;
+  const caloriesBurned = calculateCaloriesBurned(exercise, minutes, intensity, weight);
+  const caloriesRange = getCaloriesBurnedRange(caloriesBurned);
   
-  return { minutes, formatted, description };
+  return { minutes, formatted, description, caloriesBurned, caloriesRange };
 }
 
 export function getCaloriesLevel(calories: number): { level: string; color: string; message: string } {
@@ -59,6 +120,7 @@ export interface ExercisePlanItem {
   exercise: Exercise;
   minutes: number;
   caloriesBurned: number;
+  intensity: ExerciseIntensity;
 }
 
 export interface ExercisePlan {
@@ -71,19 +133,24 @@ export interface ExercisePlan {
   items: ExercisePlanItem[];
 }
 
-function getCaloriesPerMinute(metValue: number, weight: number): number {
+function getCaloriesPerMinute(
+  exercise: Exercise,
+  intensity: ExerciseIntensity,
+  weight: number
+): number {
+  const metValue = getMetValue(exercise, intensity);
   return (metValue * 3.5 * weight) / 200;
 }
 
 function generateQuickFatBurnPlan(targetCalories: number, weight: number): ExercisePlan {
-  const exercises = getAllExercises().filter(e => e.metValue >= 7.0);
+  const exercises = getAllExercises().filter(e => e.metValues.high >= 7.0);
   const items: ExercisePlanItem[] = [];
   let remainingCalories = targetCalories;
   let totalMinutes = 0;
 
   for (const exercise of exercises.slice(0, 3)) {
     if (remainingCalories <= 0) break;
-    const caloriesPerMin = getCaloriesPerMinute(exercise.metValue, weight);
+    const caloriesPerMin = getCaloriesPerMinute(exercise, 'high', weight);
     const minutes = Math.ceil((remainingCalories * 0.4) / caloriesPerMin);
     const actualCalories = minutes * caloriesPerMin;
     
@@ -91,7 +158,8 @@ function generateQuickFatBurnPlan(targetCalories: number, weight: number): Exerc
       items.push({
         exercise,
         minutes,
-        caloriesBurned: Math.round(actualCalories)
+        caloriesBurned: Math.round(actualCalories),
+        intensity: 'high'
       });
       totalMinutes += minutes;
       remainingCalories -= actualCalories;
@@ -111,7 +179,7 @@ function generateQuickFatBurnPlan(targetCalories: number, weight: number): Exerc
 
 function generateBalancedPlan(targetCalories: number, weight: number): ExercisePlan {
   const allExercises = getAllExercises();
-  const cardioExercises = allExercises.filter(e => e.metValue >= 6.0);
+  const cardioExercises = allExercises.filter(e => e.metValues.medium >= 6.0);
   const strengthExercises = allExercises.filter(e => e.id === 'weight-training' || e.id === 'yoga');
   
   const items: ExercisePlanItem[] = [];
@@ -119,37 +187,39 @@ function generateBalancedPlan(targetCalories: number, weight: number): ExerciseP
 
   const warmUp = allExercises.find(e => e.id === 'walking');
   if (warmUp) {
-    const caloriesPerMin = getCaloriesPerMinute(warmUp.metValue, weight);
-    items.push({ exercise: warmUp, minutes: 10, caloriesBurned: Math.round(10 * caloriesPerMin) });
+    const caloriesPerMin = getCaloriesPerMinute(warmUp, 'low', weight);
+    items.push({ exercise: warmUp, minutes: 10, caloriesBurned: Math.round(10 * caloriesPerMin), intensity: 'low' });
     totalMinutes += 10;
   }
 
   const cardio = cardioExercises[Math.floor(Math.random() * cardioExercises.length)];
   const cardioCalories = targetCalories * 0.5;
-  const cardioCaloriesPerMin = getCaloriesPerMinute(cardio.metValue, weight);
+  const cardioCaloriesPerMin = getCaloriesPerMinute(cardio, 'medium', weight);
   const cardioMinutes = Math.ceil(cardioCalories / cardioCaloriesPerMin);
   items.push({
     exercise: cardio,
     minutes: cardioMinutes,
-    caloriesBurned: Math.round(cardioMinutes * cardioCaloriesPerMin)
+    caloriesBurned: Math.round(cardioMinutes * cardioCaloriesPerMin),
+    intensity: 'medium'
   });
   totalMinutes += cardioMinutes;
 
   const strength = strengthExercises[Math.floor(Math.random() * strengthExercises.length)];
   const strengthCalories = targetCalories * 0.3;
-  const strengthCaloriesPerMin = getCaloriesPerMinute(strength.metValue, weight);
+  const strengthCaloriesPerMin = getCaloriesPerMinute(strength, 'medium', weight);
   const strengthMinutes = Math.ceil(strengthCalories / strengthCaloriesPerMin);
   items.push({
     exercise: strength,
     minutes: strengthMinutes,
-    caloriesBurned: Math.round(strengthMinutes * strengthCaloriesPerMin)
+    caloriesBurned: Math.round(strengthMinutes * strengthCaloriesPerMin),
+    intensity: 'medium'
   });
   totalMinutes += strengthMinutes;
 
   const coolDown = allExercises.find(e => e.id === 'yoga');
   if (coolDown && coolDown.id !== strength.id) {
-    const coolDownCaloriesPerMin = getCaloriesPerMinute(coolDown.metValue, weight);
-    items.push({ exercise: coolDown, minutes: 10, caloriesBurned: Math.round(10 * coolDownCaloriesPerMin) });
+    const coolDownCaloriesPerMin = getCaloriesPerMinute(coolDown, 'low', weight);
+    items.push({ exercise: coolDown, minutes: 10, caloriesBurned: Math.round(10 * coolDownCaloriesPerMin), intensity: 'low' });
     totalMinutes += 10;
   }
 
@@ -168,7 +238,7 @@ function generateBalancedPlan(targetCalories: number, weight: number): ExerciseP
 
 function generateEasyPlan(targetCalories: number, weight: number): ExercisePlan {
   const allExercises = getAllExercises();
-  const easyExercises = allExercises.filter(e => e.metValue < 6.0 && e.id !== 'sitting');
+  const easyExercises = allExercises.filter(e => e.metValues.low < 6.0 && e.id !== 'sitting');
   
   const items: ExercisePlanItem[] = [];
   let totalMinutes = 0;
@@ -176,7 +246,7 @@ function generateEasyPlan(targetCalories: number, weight: number): ExercisePlan 
 
   for (let i = 0; i < Math.min(4, easyExercises.length); i++) {
     const exercise = easyExercises[i];
-    const caloriesPerMin = getCaloriesPerMinute(exercise.metValue, weight);
+    const caloriesPerMin = getCaloriesPerMinute(exercise, 'low', weight);
     const minutes = Math.ceil((remainingCalories / (4 - i)) / caloriesPerMin);
     const actualCalories = minutes * caloriesPerMin;
     
@@ -184,7 +254,8 @@ function generateEasyPlan(targetCalories: number, weight: number): ExercisePlan 
       items.push({
         exercise,
         minutes,
-        caloriesBurned: Math.round(actualCalories)
+        caloriesBurned: Math.round(actualCalories),
+        intensity: 'low'
       });
       totalMinutes += minutes;
       remainingCalories -= actualCalories;
@@ -213,14 +284,15 @@ function generateVarietyPlan(targetCalories: number, weight: number): ExercisePl
   const caloriesPerExercise = targetCalories / shuffled.length;
 
   for (const exercise of shuffled) {
-    const caloriesPerMin = getCaloriesPerMinute(exercise.metValue, weight);
+    const caloriesPerMin = getCaloriesPerMinute(exercise, 'medium', weight);
     const minutes = Math.ceil(caloriesPerExercise / caloriesPerMin);
     
     if (minutes >= 5) {
       items.push({
         exercise,
         minutes,
-        caloriesBurned: Math.round(minutes * caloriesPerMin)
+        caloriesBurned: Math.round(minutes * caloriesPerMin),
+        intensity: 'medium'
       });
       totalMinutes += minutes;
     }
@@ -250,3 +322,9 @@ export function generateExercisePlans(
     generateVarietyPlan(targetCalories, weight)
   ];
 }
+
+export function sumExerciseCalories(items: Array<{ caloriesBurned: number }>): number {
+  return items.reduce((sum, item) => sum + item.caloriesBurned, 0);
+}
+
+export const ERROR_MARGIN_DESCRIPTION = `计算结果基于MET（代谢当量）公式，实际消耗可能因个人体质、运动技巧、环境温度等因素存在约${Math.round(ERROR_MARGIN * 100)}%的误差范围。`;

@@ -1,4 +1,5 @@
 import type { Snack } from './snacks';
+import type { ExerciseIntensity } from './exercises';
 
 export interface CalorieRecord {
   id: string;
@@ -17,17 +18,39 @@ export interface CalorieRecord {
   createdAt: string;
 }
 
+export interface ExerciseRecord {
+  id: string;
+  type: 'exercise';
+  exerciseId: string;
+  exerciseName: string;
+  intensity: ExerciseIntensity;
+  minutes: number;
+  caloriesBurned: number;
+  weight: number;
+  date: string;
+  time: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export type DailyRecord = CalorieRecord | ExerciseRecord;
+
 export interface DailySummary {
   date: string;
   totalCalories: number;
   totalProtein: number;
   totalFat: number;
   totalCarbs: number;
+  totalCaloriesBurned: number;
+  netCalories: number;
   recordCount: number;
+  exerciseCount: number;
   records: CalorieRecord[];
+  exerciseRecords: ExerciseRecord[];
 }
 
 const STORAGE_KEY = 'snack_calorie_records';
+const EXERCISE_STORAGE_KEY = 'exercise_records';
 
 function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -106,6 +129,44 @@ export function updateRecord(
   return null;
 }
 
+export function getExerciseRecords(): ExerciseRecord[] {
+  try {
+    const data = localStorage.getItem(EXERCISE_STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveExerciseRecords(records: ExerciseRecord[]): void {
+  localStorage.setItem(EXERCISE_STORAGE_KEY, JSON.stringify(records));
+}
+
+export function addExerciseRecord(
+  record: Omit<ExerciseRecord, 'id' | 'createdAt' | 'type'>
+): ExerciseRecord {
+  const records = getExerciseRecords();
+  const newRecord: ExerciseRecord = {
+    ...record,
+    id: generateId(),
+    type: 'exercise',
+    createdAt: new Date().toISOString(),
+  };
+  records.unshift(newRecord);
+  saveExerciseRecords(records);
+  return newRecord;
+}
+
+export function deleteExerciseRecord(id: string): boolean {
+  const records = getExerciseRecords();
+  const filtered = records.filter((r) => r.id !== id);
+  if (filtered.length !== records.length) {
+    saveExerciseRecords(filtered);
+    return true;
+  }
+  return false;
+}
+
 export function getRecordsByDateRange(
   startDate: string,
   endDate: string
@@ -114,28 +175,53 @@ export function getRecordsByDateRange(
   return records.filter((r) => r.date >= startDate && r.date <= endDate);
 }
 
+export function getExerciseRecordsByDateRange(
+  startDate: string,
+  endDate: string
+): ExerciseRecord[] {
+  const records = getExerciseRecords();
+  return records.filter((r) => r.date >= startDate && r.date <= endDate);
+}
+
 export function getRecordsByDate(date: string): CalorieRecord[] {
   const records = getRecords();
   return records.filter((r) => r.date === date);
 }
 
+export function getExerciseRecordsByDate(date: string): ExerciseRecord[] {
+  const records = getExerciseRecords();
+  return records.filter((r) => r.date === date);
+}
+
 export function getDailySummary(date: string): DailySummary {
   const records = getRecordsByDate(date);
-  return calculateDailySummary(records, date);
+  const exerciseRecords = getExerciseRecordsByDate(date);
+  return calculateDailySummary(records, exerciseRecords, date);
 }
 
 function calculateDailySummary(
   records: CalorieRecord[],
+  exerciseRecords: ExerciseRecord[],
   date: string
 ): DailySummary {
+  const totalCalories = records.reduce((sum, r) => sum + r.calories, 0);
+  const totalProtein = records.reduce((sum, r) => sum + r.protein, 0);
+  const totalFat = records.reduce((sum, r) => sum + r.fat, 0);
+  const totalCarbs = records.reduce((sum, r) => sum + r.carbs, 0);
+  const totalCaloriesBurned = exerciseRecords.reduce((sum, r) => sum + r.caloriesBurned, 0);
+  
   return {
     date,
-    totalCalories: records.reduce((sum, r) => sum + r.calories, 0),
-    totalProtein: records.reduce((sum, r) => sum + r.protein, 0),
-    totalFat: records.reduce((sum, r) => sum + r.fat, 0),
-    totalCarbs: records.reduce((sum, r) => sum + r.carbs, 0),
+    totalCalories,
+    totalProtein,
+    totalFat,
+    totalCarbs,
+    totalCaloriesBurned,
+    netCalories: totalCalories - totalCaloriesBurned,
     recordCount: records.length,
+    exerciseCount: exerciseRecords.length,
     records,
+    exerciseRecords,
   };
 }
 
@@ -144,13 +230,14 @@ export function getDailySummariesByDateRange(
   endDate: string
 ): Map<string, DailySummary> {
   const records = getRecordsByDateRange(startDate, endDate);
+  const exerciseRecords = getExerciseRecordsByDateRange(startDate, endDate);
   const summaries = new Map<string, DailySummary>();
 
   const start = new Date(startDate);
   const end = new Date(endDate);
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     const dateStr = d.toISOString().split('T')[0];
-    summaries.set(dateStr, calculateDailySummary([], dateStr));
+    summaries.set(dateStr, calculateDailySummary([], [], dateStr));
   }
 
   records.forEach((record) => {
@@ -162,6 +249,17 @@ export function getDailySummariesByDateRange(
       summary.totalCarbs += record.carbs;
       summary.recordCount += 1;
       summary.records.push(record);
+      summary.netCalories = summary.totalCalories - summary.totalCaloriesBurned;
+    }
+  });
+
+  exerciseRecords.forEach((record) => {
+    const summary = summaries.get(record.date);
+    if (summary) {
+      summary.totalCaloriesBurned += record.caloriesBurned;
+      summary.exerciseCount += 1;
+      summary.exerciseRecords.push(record);
+      summary.netCalories = summary.totalCalories - summary.totalCaloriesBurned;
     }
   });
 
@@ -206,4 +304,12 @@ export function getRecentRecords(days: number = 30): CalorieRecord[] {
     startDate.toISOString().split('T')[0],
     endDate.toISOString().split('T')[0]
   );
+}
+
+export function getTotalExerciseCaloriesBurned(records: ExerciseRecord[]): number {
+  return records.reduce((sum, r) => sum + r.caloriesBurned, 0);
+}
+
+export function getTotalExerciseMinutes(records: ExerciseRecord[]): number {
+  return records.reduce((sum, r) => sum + r.minutes, 0);
 }

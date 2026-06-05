@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Flame, Scale, Droplets, Wheat, ArrowLeft, Lightbulb, Dumbbell, User, X, Download, ChevronDown, Heart, Folder, Check, Tag, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Flame, Scale, Droplets, Wheat, ArrowLeft, Lightbulb, Dumbbell, User, X, Download, ChevronDown, Heart, Folder, Check, Tag, Plus, Edit2, Trash2, Zap } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import html2canvas from 'html2canvas';
 import { getSnackById, getAlternatives, TAG_INFO, getTagInfo } from '../data/snacks';
-import { getAllExercises } from '../data/exercises';
-import { getCaloriesLevel, getWeightOptions } from '../utils/calculator';
+import { getAllExercises, getIntensityLabel, type ExerciseIntensity } from '../data/exercises';
+import { getCaloriesLevel, getWeightOptions, kcalToKj, type EnergyUnit, ERROR_MARGIN_DESCRIPTION } from '../utils/calculator';
 import { ExerciseCard } from '../components/ExerciseCard';
 import { AlternativeCard } from '../components/AlternativeCard';
 import { useBrowsingHistory } from '../utils/useBrowsingHistory';
@@ -16,6 +16,8 @@ export function SnackDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [weight, setWeight] = useState(65);
+  const [intensity, setIntensity] = useState<ExerciseIntensity>('medium');
+  const [energyUnit, setEnergyUnit] = useState<EnergyUnit>('kcal');
   const [showAllExercises, setShowAllExercises] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
@@ -547,7 +549,7 @@ export function SnackDetail() {
           </div>
 
           <div className="bg-white rounded-3xl p-6 md:p-8 card-shadow mb-8">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
                   <Scale className="w-5 h-5 text-primary-600" />
@@ -556,26 +558,81 @@ export function SnackDetail() {
                   <h2 className="font-poppins text-xl font-bold text-gray-800">
                     需要运动多久才能消耗？
                   </h2>
-                  <p className="text-sm text-gray-500">基于你的体重计算</p>
+                  <p className="text-sm text-gray-500">基于你的体重和运动强度计算</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-gray-400" />
-                <select
-                  value={weight}
-                  onChange={(e) => setWeight(Number(e.target.value))}
-                  className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-200"
-                >
-                  {getWeightOptions().map((w) => (
-                    <option key={w} value={w}>{w} kg</option>
-                  ))}
-                </select>
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setEnergyUnit('kcal')}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                      energyUnit === 'kcal'
+                        ? 'bg-white text-primary-600 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    千卡
+                  </button>
+                  <button
+                    onClick={() => setEnergyUnit('kJ')}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                      energyUnit === 'kJ'
+                        ? 'bg-white text-primary-600 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    千焦
+                  </button>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-gray-400" />
+                  <select
+                    value={weight}
+                    onChange={(e) => setWeight(Number(e.target.value))}
+                    className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                  >
+                    {getWeightOptions().map((w) => (
+                      <option key={w} value={w}>{w} kg</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="w-4 h-4 text-orange-500" />
+                <span className="text-sm font-medium text-gray-700">选择运动强度</span>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {(['low', 'medium', 'high'] as ExerciseIntensity[]).map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setIntensity(level)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      intensity === level
+                        ? 'bg-primary-500 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {getIntensityLabel(level)}
+                  </button>
+                ))}
               </div>
             </div>
             
             <div className="mb-6">
-              <ExerciseCard snack={snack} exercise={allExercises[0]} weight={weight} isMain />
+              <ExerciseCard
+                snack={snack}
+                exercise={allExercises[0]}
+                weight={weight}
+                intensity={intensity}
+                energyUnit={energyUnit}
+                isMain
+                showRange
+              />
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -585,6 +642,9 @@ export function SnackDetail() {
                   snack={snack}
                   exercise={exercise}
                   weight={weight}
+                  intensity={intensity}
+                  energyUnit={energyUnit}
+                  showRange
                 />
               ))}
             </div>
@@ -597,6 +657,13 @@ export function SnackDetail() {
                 <span>查看全部运动类型</span>
                 <ChevronDown className="w-5 h-5" />
               </button>
+            </div>
+            
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl flex items-start gap-3">
+              <Zap className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-blue-700">
+                {ERROR_MARGIN_DESCRIPTION}
+              </p>
             </div>
           </div>
 
@@ -640,7 +707,12 @@ export function SnackDetail() {
                   <h2 className="font-poppins text-xl font-bold text-gray-800">
                     全部运动类型
                   </h2>
-                  <p className="text-sm text-gray-500">消耗 {snack.calories} 千卡所需时间</p>
+                  <p className="text-sm text-gray-500">
+                    {energyUnit === 'kJ' 
+                      ? `消耗约 ${Math.round(kcalToKj(snack.calories))} 千焦所需时间`
+                      : `消耗 ${snack.calories} 千卡所需时间`
+                    }
+                  </p>
                 </div>
               </div>
               <button
@@ -651,6 +723,66 @@ export function SnackDetail() {
               </button>
             </div>
             
+            <div className="mb-4 flex flex-wrap gap-3">
+              <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setEnergyUnit('kcal')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                    energyUnit === 'kcal'
+                      ? 'bg-white text-primary-600 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  千卡
+                </button>
+                <button
+                  onClick={() => setEnergyUnit('kJ')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                    energyUnit === 'kJ'
+                      ? 'bg-white text-primary-600 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  千焦
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-gray-400" />
+                <select
+                  value={weight}
+                  onChange={(e) => setWeight(Number(e.target.value))}
+                  className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                >
+                  {getWeightOptions().map((w) => (
+                    <option key={w} value={w}>{w} kg</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="w-4 h-4 text-orange-500" />
+                <span className="text-sm font-medium text-gray-700">运动强度</span>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {(['low', 'medium', 'high'] as ExerciseIntensity[]).map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setIntensity(level)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      intensity === level
+                        ? 'bg-primary-500 text-white shadow-sm'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {getIntensityLabel(level)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {allExercises.map((exercise) => (
                 <ExerciseCard
@@ -658,8 +790,18 @@ export function SnackDetail() {
                   snack={snack}
                   exercise={exercise}
                   weight={weight}
+                  intensity={intensity}
+                  energyUnit={energyUnit}
+                  showRange
                 />
               ))}
+            </div>
+            
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl flex items-start gap-3">
+              <Zap className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-blue-700">
+                {ERROR_MARGIN_DESCRIPTION}
+              </p>
             </div>
           </div>
         </div>

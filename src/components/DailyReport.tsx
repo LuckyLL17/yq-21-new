@@ -8,20 +8,23 @@ import {
   Activity,
   Droplets,
   Zap,
+  Dumbbell,
+  Scale,
 } from 'lucide-react';
 import type { DailySummary } from '../data/records';
 import { getDailySummary } from '../data/records';
-import { getCaloriesLevel } from '../utils/calculator';
+import { getCaloriesLevel, formatEnergy, type EnergyUnit } from '../utils/calculator';
 
 interface DailyReportProps {
   date?: string;
   onDateChange?: (date: string) => void;
   refreshTrigger?: number;
+  energyUnit?: EnergyUnit;
 }
 
 const DAILY_CALORIE_GOAL = 2000;
 
-export function DailyReport({ date: propDate, onDateChange, refreshTrigger }: DailyReportProps) {
+export function DailyReport({ date: propDate, onDateChange, refreshTrigger, energyUnit = 'kcal' }: DailyReportProps) {
   const currentDate = propDate || new Date().toISOString().split('T')[0];
   const [summary, setSummary] = useState<DailySummary | null>(null);
 
@@ -123,17 +126,14 @@ export function DailyReport({ date: propDate, onDateChange, refreshTrigger }: Da
             <div>
               <div className="text-sm text-gray-500">今日摄入</div>
               <div className="text-2xl font-bold text-gray-800">
-                {summary.totalCalories.toFixed(0)}
-                <span className="text-sm font-normal text-gray-500 ml-1">
-                  kcal
-                </span>
+                {formatEnergy(summary.totalCalories, energyUnit)}
               </div>
             </div>
           </div>
           <div className="text-right">
             <div className="text-sm text-gray-500">目标</div>
             <div className="text-lg font-semibold text-gray-700">
-              {DAILY_CALORIE_GOAL} kcal
+              {formatEnergy(DAILY_CALORIE_GOAL, energyUnit)}
             </div>
           </div>
         </div>
@@ -155,11 +155,59 @@ export function DailyReport({ date: propDate, onDateChange, refreshTrigger }: Da
           </span>
           <span className="text-sm text-gray-500">
             {remaining > 0
-              ? `还可摄入 ${remaining.toFixed(0)} kcal`
-              : `已超标 ${Math.abs(remaining).toFixed(0)} kcal`}
+              ? `还可摄入 ${formatEnergy(remaining, energyUnit)}`
+              : `已超标 ${formatEnergy(Math.abs(remaining), energyUnit)}`}
           </span>
         </div>
       </div>
+
+      {summary.exerciseCount > 0 && (
+        <div className="mb-6 p-4 bg-green-50 rounded-xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center">
+                <Dumbbell className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">运动消耗</div>
+                <div className="text-xl font-bold text-green-600">
+                  -{formatEnergy(summary.totalCaloriesBurned, energyUnit)}
+                </div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-sm text-gray-500">运动次数</div>
+              <div className="text-lg font-semibold text-gray-700">
+                {summary.exerciseCount} 次
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {summary.totalCaloriesBurned > 0 && (
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                <Scale className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">净热量</div>
+                <div className={`text-xl font-bold ${
+                  summary.netCalories > 0 ? 'text-orange-500' : 'text-green-600'
+                }`}>
+                  {summary.netCalories > 0 ? '+' : ''}
+                  {formatEnergy(summary.netCalories, energyUnit)}
+                </div>
+              </div>
+            </div>
+            <div className="text-right text-xs text-gray-500">
+              摄入 - 消耗
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="p-4 bg-blue-50 rounded-xl text-center">
@@ -234,7 +282,7 @@ export function DailyReport({ date: propDate, onDateChange, refreshTrigger }: Da
         <div className="p-4 bg-gray-50 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <Target className="w-4 h-4 text-primary-500" />
-            <span className="text-sm text-gray-600">记录数量</span>
+            <span className="text-sm text-gray-600">摄入记录</span>
           </div>
           <div className="text-2xl font-bold text-gray-800">
             {summary.recordCount}
@@ -248,7 +296,7 @@ export function DailyReport({ date: propDate, onDateChange, refreshTrigger }: Da
           </div>
           <div className="text-2xl font-bold text-gray-800">
             {summary.recordCount > 0
-              ? (summary.totalCalories / summary.recordCount).toFixed(0)
+              ? Math.round(summary.totalCalories / summary.recordCount)
               : 0}
             <span className="text-sm font-normal text-gray-500 ml-1">kcal</span>
           </div>
