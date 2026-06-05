@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Flame, ArrowLeft, History, Palette, Check, Heart, Dumbbell } from 'lucide-react';
+import { Flame, ArrowLeft, History, Palette, Check, Heart, Dumbbell, HeartPulse } from 'lucide-react';
 import { SearchBar } from './SearchBar';
 import { useTheme, themes } from '../utils/ThemeContext';
 import { useFavorites } from '../utils/useFavorites';
@@ -12,6 +12,7 @@ export function Header() {
   const isRecords = location.pathname === '/records';
   const isFavorites = location.pathname === '/favorites';
   const isExercisePlan = location.pathname === '/exercise-plan';
+  const isHealth = location.pathname === '/health';
   const { currentTheme, setTheme } = useTheme();
   const { favorites } = useFavorites();
   const [showThemeMenu, setShowThemeMenu] = useState(false);
@@ -47,6 +48,17 @@ export function Header() {
               }`}
             >
               首页
+            </Link>
+            <Link
+              to="/health"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                isHealth
+                  ? 'bg-primary-50 text-primary-600'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <HeartPulse className="w-4 h-4" />
+              健康建议
             </Link>
             <Link
               to="/exercise-plan"
@@ -88,7 +100,7 @@ export function Header() {
             </Link>
           </nav>
 
-          {!isHome && !isRecords && !isFavorites && !isExercisePlan && (
+          {!isHome && !isRecords && !isFavorites && !isExercisePlan && !isHealth && (
             <div className="flex-1 max-w-md">
               <SearchBar variant="normal" />
             </div>
@@ -136,6 +148,12 @@ export function Header() {
             )}
           </div>
 
+          <Link
+            to="/health"
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <HeartPulse className={`w-5 h-5 ${isHealth ? 'text-primary-500' : 'text-gray-600'}`} />
+          </Link>
           <Link
             to="/exercise-plan"
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
