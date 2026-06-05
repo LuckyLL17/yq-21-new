@@ -1,3 +1,35 @@
+export type SnackTag = 
+  | 'vegetarian'
+  | 'gluten-free'
+  | 'low-sugar'
+  | 'low-fat'
+  | 'high-protein'
+  | 'fried'
+  | 'non-fried'
+  | 'low-calorie'
+  | 'dairy-free'
+  | 'nut-free';
+
+export interface TagInfo {
+  id: SnackTag;
+  name: string;
+  color: string;
+  bgColor: string;
+}
+
+export const TAG_INFO: TagInfo[] = [
+  { id: 'vegetarian', name: '素食', color: 'text-green-600', bgColor: 'bg-green-100' },
+  { id: 'gluten-free', name: '无麸质', color: 'text-amber-600', bgColor: 'bg-amber-100' },
+  { id: 'low-sugar', name: '低糖', color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  { id: 'low-fat', name: '低脂', color: 'text-cyan-600', bgColor: 'bg-cyan-100' },
+  { id: 'high-protein', name: '高蛋白', color: 'text-orange-600', bgColor: 'bg-orange-100' },
+  { id: 'fried', name: '油炸', color: 'text-red-600', bgColor: 'bg-red-100' },
+  { id: 'non-fried', name: '非油炸', color: 'text-emerald-600', bgColor: 'bg-emerald-100' },
+  { id: 'low-calorie', name: '低热量', color: 'text-teal-600', bgColor: 'bg-teal-100' },
+  { id: 'dairy-free', name: '无乳制品', color: 'text-purple-600', bgColor: 'bg-purple-100' },
+  { id: 'nut-free', name: '坚果过敏友好', color: 'text-pink-600', bgColor: 'bg-pink-100' },
+];
+
 export interface Snack {
   id: string;
   name: string;
@@ -8,6 +40,7 @@ export interface Snack {
   fat: number;
   carbs: number;
   description?: string;
+  tags: SnackTag[];
 }
 
 export const snacks: Snack[] = [
@@ -20,7 +53,8 @@ export const snacks: Snack[] = [
     protein: 7,
     fat: 35,
     carbs: 50,
-    description: '经典香脆薯片'
+    description: '经典香脆薯片',
+    tags: ['fried', 'vegetarian']
   },
   {
     id: 'chips-bbq',
@@ -31,7 +65,8 @@ export const snacks: Snack[] = [
     protein: 6.5,
     fat: 33,
     carbs: 52,
-    description: '烧烤风味薯片'
+    description: '烧烤风味薯片',
+    tags: ['fried', 'vegetarian']
   },
   {
     id: 'chocolate-milk',
@@ -42,7 +77,8 @@ export const snacks: Snack[] = [
     protein: 7.6,
     fat: 30.7,
     carbs: 59.4,
-    description: '丝滑牛奶巧克力'
+    description: '丝滑牛奶巧克力',
+    tags: ['vegetarian', 'nut-free']
   },
   {
     id: 'chocolate-dark',
@@ -53,7 +89,8 @@ export const snacks: Snack[] = [
     protein: 7.8,
     fat: 43,
     carbs: 36,
-    description: '浓郁黑巧克力'
+    description: '浓郁黑巧克力',
+    tags: ['vegetarian', 'low-sugar', 'dairy-free', 'nut-free']
   },
   {
     id: 'cookie-chocolate',
@@ -64,7 +101,8 @@ export const snacks: Snack[] = [
     protein: 2,
     fat: 7,
     carbs: 20,
-    description: '香浓巧克力曲奇'
+    description: '香浓巧克力曲奇',
+    tags: ['vegetarian', 'nut-free']
   },
   {
     id: 'cookie-butter',
@@ -75,7 +113,8 @@ export const snacks: Snack[] = [
     protein: 1.8,
     fat: 6.5,
     carbs: 19,
-    description: '酥脆黄油曲奇'
+    description: '酥脆黄油曲奇',
+    tags: ['vegetarian', 'nut-free']
   },
   {
     id: 'ice-cream-vanilla',
@@ -86,7 +125,8 @@ export const snacks: Snack[] = [
     protein: 3.5,
     fat: 11,
     carbs: 24,
-    description: '经典香草冰淇淋'
+    description: '经典香草冰淇淋',
+    tags: ['vegetarian', 'nut-free']
   },
   {
     id: 'ice-cream-chocolate',
@@ -97,7 +137,8 @@ export const snacks: Snack[] = [
     protein: 3.8,
     fat: 11.5,
     carbs: 25,
-    description: '浓郁巧克力冰淇淋'
+    description: '浓郁巧克力冰淇淋',
+    tags: ['vegetarian', 'nut-free']
   },
   {
     id: 'candy-gummy',
@@ -108,7 +149,8 @@ export const snacks: Snack[] = [
     protein: 6.5,
     fat: 0.3,
     carbs: 76,
-    description: 'Q弹水果软糖'
+    description: 'Q弹水果软糖',
+    tags: ['low-fat', 'vegetarian', 'dairy-free', 'nut-free']
   },
   {
     id: 'candy-lollipop',
@@ -119,7 +161,8 @@ export const snacks: Snack[] = [
     protein: 0,
     fat: 0,
     carbs: 20,
-    description: '甜蜜水果棒棒糖'
+    description: '甜蜜水果棒棒糖',
+    tags: ['low-fat', 'low-calorie', 'vegetarian', 'dairy-free', 'nut-free']
   },
   {
     id: 'nuts-mixed',
@@ -130,7 +173,8 @@ export const snacks: Snack[] = [
     protein: 5.5,
     fat: 15,
     carbs: 8,
-    description: '健康混合坚果'
+    description: '健康混合坚果',
+    tags: ['high-protein', 'gluten-free', 'dairy-free', 'vegetarian']
   },
   {
     id: 'nuts-almond',
@@ -141,7 +185,8 @@ export const snacks: Snack[] = [
     protein: 6.3,
     fat: 15.5,
     carbs: 6,
-    description: '营养加州杏仁'
+    description: '营养加州杏仁',
+    tags: ['high-protein', 'low-sugar', 'gluten-free', 'dairy-free', 'vegetarian']
   },
   {
     id: 'popcorn-butter',
@@ -152,7 +197,8 @@ export const snacks: Snack[] = [
     protein: 8,
     fat: 28,
     carbs: 55,
-    description: '电影院黄油爆米花'
+    description: '电影院黄油爆米花',
+    tags: ['non-fried', 'vegetarian', 'nut-free']
   },
   {
     id: 'popcorn-plain',
@@ -163,7 +209,8 @@ export const snacks: Snack[] = [
     protein: 12,
     fat: 4.5,
     carbs: 78,
-    description: '无油原味爆米花'
+    description: '无油原味爆米花',
+    tags: ['non-fried', 'low-fat', 'high-protein', 'gluten-free', 'dairy-free', 'vegetarian', 'nut-free']
   },
   {
     id: 'pocky',
@@ -174,7 +221,8 @@ export const snacks: Snack[] = [
     protein: 2.5,
     fat: 9,
     carbs: 28,
-    description: '巧克力涂层饼干棒'
+    description: '巧克力涂层饼干棒',
+    tags: ['vegetarian', 'nut-free']
   },
   {
     id: 'potato-stick',
@@ -185,7 +233,8 @@ export const snacks: Snack[] = [
     protein: 4,
     fat: 17,
     carbs: 48,
-    description: '金黄酥脆薯条'
+    description: '金黄酥脆薯条',
+    tags: ['fried', 'vegetarian', 'gluten-free', 'dairy-free', 'nut-free']
   },
   {
     id: 'donut-glazed',
@@ -196,7 +245,8 @@ export const snacks: Snack[] = [
     protein: 4,
     fat: 14,
     carbs: 31,
-    description: '经典糖霜甜甜圈'
+    description: '经典糖霜甜甜圈',
+    tags: ['vegetarian', 'nut-free']
   },
   {
     id: 'muffin-blueberry',
@@ -207,7 +257,8 @@ export const snacks: Snack[] = [
     protein: 4.8,
     fat: 16,
     carbs: 55,
-    description: '蓝莓果肉马芬蛋糕'
+    description: '蓝莓果肉马芬蛋糕',
+    tags: ['vegetarian', 'nut-free']
   },
   {
     id: 'fruit-dried-mango',
@@ -218,7 +269,8 @@ export const snacks: Snack[] = [
     protein: 1.4,
     fat: 0.7,
     carbs: 80,
-    description: '酸甜芒果干'
+    description: '酸甜芒果干',
+    tags: ['low-fat', 'gluten-free', 'dairy-free', 'vegetarian', 'nut-free']
   },
   {
     id: 'yogurt-greek',
@@ -229,7 +281,8 @@ export const snacks: Snack[] = [
     protein: 17,
     fat: 0.7,
     carbs: 6,
-    description: '高蛋白希腊酸奶'
+    description: '高蛋白希腊酸奶',
+    tags: ['high-protein', 'low-fat', 'low-sugar', 'low-calorie', 'gluten-free', 'vegetarian', 'nut-free']
   },
   {
     id: 'milk-tea',
@@ -240,7 +293,8 @@ export const snacks: Snack[] = [
     protein: 2,
     fat: 8,
     carbs: 95,
-    description: '经典珍珠奶茶'
+    description: '经典珍珠奶茶',
+    tags: ['vegetarian', 'nut-free']
   },
   {
     id: 'cola',
@@ -251,7 +305,8 @@ export const snacks: Snack[] = [
     protein: 0,
     fat: 0,
     carbs: 35,
-    description: '碳酸饮料'
+    description: '碳酸饮料',
+    tags: ['low-fat', 'gluten-free', 'dairy-free', 'vegetarian', 'nut-free']
   },
   {
     id: 'instant-noodles',
@@ -262,7 +317,8 @@ export const snacks: Snack[] = [
     protein: 9,
     fat: 20,
     carbs: 65,
-    description: '红烧牛肉方便面'
+    description: '红烧牛肉方便面',
+    tags: ['fried']
   },
   {
     id: 'rice-cracker',
@@ -273,7 +329,8 @@ export const snacks: Snack[] = [
     protein: 3,
     fat: 6,
     carbs: 34,
-    description: '香脆米饼'
+    description: '香脆米饼',
+    tags: ['non-fried', 'vegetarian', 'nut-free']
   }
 ];
 
@@ -325,10 +382,16 @@ export function getHotSearchKeywords(): { keyword: string; count: number }[] {
 
 export function findSnacksGroupedByCategory(name: string): Record<string, Snack[]> {
   const searchLower = name.toLowerCase().trim();
+  
+  const matchingTagIds = TAG_INFO
+    .filter(tag => tag.name.toLowerCase().includes(searchLower))
+    .map(tag => tag.id);
+  
   const results = snacks.filter(snack => 
     snack.name.toLowerCase().includes(searchLower) ||
     snack.id.toLowerCase().includes(searchLower) ||
-    snack.category.toLowerCase().includes(searchLower)
+    snack.category.toLowerCase().includes(searchLower) ||
+    (matchingTagIds.length > 0 && matchingTagIds.some(tagId => snack.tags.includes(tagId)))
   );
   
   const grouped: Record<string, Snack[]> = {};
@@ -351,4 +414,56 @@ export function getSnacksByCategory(category: string): Snack[] {
     return snacks;
   }
   return snacks.filter(s => s.category === category);
+}
+
+export function filterSnacksByTags(snackList: Snack[], tags: SnackTag[]): Snack[] {
+  if (tags.length === 0) return snackList;
+  return snackList.filter(snack => 
+    tags.every(tag => snack.tags.includes(tag))
+  );
+}
+
+export function filterSnacksByCalories(
+  snackList: Snack[], 
+  minCalories?: number, 
+  maxCalories?: number
+): Snack[] {
+  return snackList.filter(snack => {
+    if (minCalories !== undefined && snack.calories < minCalories) return false;
+    if (maxCalories !== undefined && snack.calories > maxCalories) return false;
+    return true;
+  });
+}
+
+export interface FilterOptions {
+  category?: string;
+  tags?: SnackTag[];
+  minCalories?: number;
+  maxCalories?: number;
+}
+
+export function filterSnacks(options: FilterOptions): Snack[] {
+  let result = [...snacks];
+  
+  if (options.category && options.category !== '全部') {
+    result = result.filter(s => s.category === options.category);
+  }
+  
+  if (options.tags && options.tags.length > 0) {
+    result = filterSnacksByTags(result, options.tags);
+  }
+  
+  if (options.minCalories !== undefined || options.maxCalories !== undefined) {
+    result = filterSnacksByCalories(result, options.minCalories, options.maxCalories);
+  }
+  
+  return result;
+}
+
+export function getTagInfo(tagId: SnackTag): TagInfo | undefined {
+  return TAG_INFO.find(t => t.id === tagId);
+}
+
+export function findSnacksByTag(tag: SnackTag): Snack[] {
+  return snacks.filter(snack => snack.tags.includes(tag));
 }

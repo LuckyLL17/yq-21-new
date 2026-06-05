@@ -1,17 +1,32 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Zap, Heart, ArrowRight, Info, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Flame, Zap, Heart, ArrowRight, Info, Clock, ChevronLeft, ChevronRight, SearchX } from 'lucide-react';
 import { SearchBar } from '../components/SearchBar';
 import { SnackCard } from '../components/SnackCard';
-import { findSnackByName, getAllCategories, getSnacksByCategory } from '../data/snacks';
+import { AdvancedFilter } from '../components/AdvancedFilter';
+import { findSnackByName, getAllCategories, filterSnacks, type SnackTag } from '../data/snacks';
 import { useBrowsingHistory } from '../utils/useBrowsingHistory';
 
 export function Home() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('全部');
+  const [selectedTags, setSelectedTags] = useState<SnackTag[]>([]);
+  const [minCalories, setMinCalories] = useState<number | undefined>();
+  const [maxCalories, setMaxCalories] = useState<number | undefined>();
   const { history: browsingHistory } = useBrowsingHistory();
   const categories = ['全部', ...getAllCategories()];
-  const categorySnacks = getSnacksByCategory(selectedCategory).slice(0, 8);
+  
+  const filteredSnacks = filterSnacks({
+    category: selectedCategory,
+    tags: selectedTags,
+    minCalories,
+    maxCalories,
+  }).slice(0, 8);
+
+  const handleCaloriesChange = (min?: number, max?: number) => {
+    setMinCalories(min);
+    setMaxCalories(max);
+  };
 
   const handleQuickSearch = (keyword: string) => {
     const results = findSnackByName(keyword);
@@ -87,7 +102,7 @@ export function Home() {
             </div>
           </div>
 
-          <div className="relative mb-8">
+          <div className="relative mb-6">
             <button
               onClick={() => scrollCategories('left')}
               className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
@@ -120,11 +135,33 @@ export function Home() {
               ))}
             </div>
           </div>
+
+          <div className="mb-8">
+            <AdvancedFilter
+              selectedTags={selectedTags}
+              selectedCategory={selectedCategory}
+              minCalories={minCalories}
+              maxCalories={maxCalories}
+              onTagsChange={setSelectedTags}
+              onCategoryChange={setSelectedCategory}
+              onCaloriesChange={handleCaloriesChange}
+            />
+          </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {categorySnacks.map((snack) => (
-              <SnackCard key={snack.id} snack={snack} />
-            ))}
+            {filteredSnacks.length > 0 ? (
+              filteredSnacks.map((snack) => (
+                <SnackCard key={snack.id} snack={snack} />
+              ))
+            ) : (
+              <div className="col-span-full py-16 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                  <SearchX className="w-8 h-8 text-gray-300" />
+                </div>
+                <p className="text-gray-600 font-medium mb-2">没有找到符合条件的零食</p>
+                <p className="text-sm text-gray-400">尝试调整筛选条件</p>
+              </div>
+            )}
           </div>
         </div>
       </section>

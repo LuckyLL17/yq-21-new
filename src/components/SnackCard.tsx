@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Flame, Heart } from 'lucide-react';
 import type { Snack } from '../data/snacks';
+import { getTagInfo } from '../data/snacks';
 import { getCaloriesLevel } from '../utils/calculator';
 import { useFavorites } from '../utils/useFavorites';
 
@@ -37,6 +38,8 @@ export function SnackCard({ snack, variant = 'grid' }: SnackCardProps) {
 
   const emoji = categoryEmojis[snack.category] || '🍴';
 
+  const displayTags = snack.tags.slice(0, 3);
+
   if (variant === 'horizontal') {
     return (
       <div
@@ -49,7 +52,20 @@ export function SnackCard({ snack, variant = 'grid' }: SnackCardProps) {
         <div className="flex-1 text-left">
           <h3 className="font-semibold text-gray-800">{snack.name}</h3>
           <p className="text-sm text-gray-500 mt-0.5">{snack.servingSize}</p>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex flex-wrap gap-1 mt-2">
+            {displayTags.map((tag) => {
+              const tagInfo = getTagInfo(tag);
+              return tagInfo ? (
+                <span
+                  key={tag}
+                  className={`text-xs px-2 py-0.5 rounded-full ${tagInfo.bgColor} ${tagInfo.color}`}
+                >
+                  {tagInfo.name}
+                </span>
+              ) : null;
+            })}
+          </div>
+          <div className="flex items-center gap-2 mt-2">
             <Flame className="w-4 h-4 text-orange-500" />
             <span className={`text-sm font-medium ${caloriesLevel.color}`}>
               {snack.calories} 千卡
@@ -89,6 +105,19 @@ export function SnackCard({ snack, variant = 'grid' }: SnackCardProps) {
       </div>
       <h3 className="font-semibold text-gray-800 text-lg">{snack.name}</h3>
       <p className="text-sm text-gray-500 mt-1">{snack.servingSize}</p>
+      <div className="flex flex-wrap gap-1 mt-2">
+        {displayTags.map((tag) => {
+          const tagInfo = getTagInfo(tag);
+          return tagInfo ? (
+            <span
+              key={tag}
+              className={`text-xs px-2 py-0.5 rounded-full ${tagInfo.bgColor} ${tagInfo.color}`}
+            >
+              {tagInfo.name}
+            </span>
+          ) : null;
+        })}
+      </div>
       <div className="flex items-center justify-between mt-3">
         <div className="flex items-center gap-1.5">
           <Flame className="w-4 h-4 text-orange-500" />
