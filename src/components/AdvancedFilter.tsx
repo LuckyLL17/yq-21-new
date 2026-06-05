@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Filter, X, ChevronDown, ChevronUp, Flame } from 'lucide-react';
 import { TAG_INFO, type SnackTag, getAllCategories } from '../data/snacks';
+import { useCustomTags } from '../utils/useCustomTags';
 
 interface AdvancedFilterProps {
-  selectedTags: SnackTag[];
+  selectedTags: string[];
   selectedCategory: string;
   minCalories?: number;
   maxCalories?: number;
-  onTagsChange: (tags: SnackTag[]) => void;
+  onTagsChange: (tags: string[]) => void;
   onCategoryChange: (category: string) => void;
   onCaloriesChange: (min?: number, max?: number) => void;
 }
@@ -23,6 +24,7 @@ export function AdvancedFilter({
 }: AdvancedFilterProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const categories = ['全部', ...getAllCategories()];
+  const { customTags } = useCustomTags();
   
   const calorieRanges = [
     { label: '全部', min: undefined, max: undefined },
@@ -32,11 +34,11 @@ export function AdvancedFilter({
     { label: '400以上', min: 400, max: undefined },
   ];
 
-  const handleTagToggle = (tag: SnackTag) => {
-    if (selectedTags.includes(tag)) {
-      onTagsChange(selectedTags.filter(t => t !== tag));
+  const handleTagToggle = (tagId: string) => {
+    if (selectedTags.includes(tagId)) {
+      onTagsChange(selectedTags.filter(t => t !== tagId));
     } else {
-      onTagsChange([...selectedTags, tag]);
+      onTagsChange([...selectedTags, tagId]);
     }
   };
 
@@ -56,6 +58,18 @@ export function AdvancedFilter({
       r => r.min === minCalories && r.max === maxCalories
     );
     return range?.label || '自定义';
+  };
+
+  const getTagDisplayInfo = (tagId: string) => {
+    const systemTag = TAG_INFO.find(t => t.id === tagId);
+    if (systemTag) {
+      return { name: systemTag.name, bgColor: systemTag.bgColor, color: systemTag.color, isCustom: false };
+    }
+    const customTag = customTags.find(t => t.id === tagId);
+    if (customTag) {
+      return { name: customTag.name, bgColor: '', color: customTag.color, isCustom: true };
+    }
+    return null;
   };
 
   return (
@@ -122,7 +136,7 @@ export function AdvancedFilter({
 
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-              <span>属性标签</span>
+              <span>系统属性标签</span>
               <span className="text-xs text-gray-400">（可多选，同时满足）</span>
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
@@ -144,6 +158,36 @@ export function AdvancedFilter({
               ))}
             </div>
           </div>
+
+          {customTags.length > 0 && (
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+                <span>自定义标签</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {customTags.map((tag) => {
+                  const isSelected = selectedTags.includes(tag.id);
+                  return (
+                    <button
+                      key={tag.id}
+                      onClick={() => handleTagToggle(tag.id)}
+                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
+                        isSelected
+                          ? 'text-white ring-2 ring-offset-1 ring-opacity-50 shadow-sm'
+                          : 'text-white opacity-60 hover:opacity-80'
+                      }`}
+                      style={{ backgroundColor: tag.color }}
+                    >
+                      {isSelected && (
+                        <X className="w-3.5 h-3.5" />
+                      )}
+                      {tag.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
@@ -182,16 +226,20 @@ export function AdvancedFilter({
               </button>
             </span>
           )}
-          {selectedTags.map((tag) => {
-            const tagInfo = TAG_INFO.find(t => t.id === tag);
+          {selectedTags.map((tagId) => {
+            const tagInfo = getTagDisplayInfo(tagId);
+            if (!tagInfo) return null;
             return (
               <span
-                key={tag}
-                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${tagInfo?.bgColor} ${tagInfo?.color}`}
+                key={tagId}
+                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
+                  tagInfo.isCustom ? 'text-white' : `${tagInfo.bgColor} ${tagInfo.color}`
+                }`}
+                style={tagInfo.isCustom ? { backgroundColor: tagInfo.color } : {}}
               >
-                {tagInfo?.name}
+                {tagInfo.name}
                 <button
-                  onClick={() => handleTagToggle(tag)}
+                  onClick={() => handleTagToggle(tagId)}
                   className="hover:opacity-70 ml-1"
                 >
                   <X className="w-3.5 h-3.5" />

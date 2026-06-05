@@ -4,6 +4,7 @@ import type { Snack } from '../data/snacks';
 import { getTagInfo } from '../data/snacks';
 import { getCaloriesLevel } from '../utils/calculator';
 import { useFavorites } from '../utils/useFavorites';
+import { useCustomTags } from '../utils/useCustomTags';
 
 interface SnackCardProps {
   snack: Snack;
@@ -14,6 +15,7 @@ export function SnackCard({ snack, variant = 'grid' }: SnackCardProps) {
   const navigate = useNavigate();
   const caloriesLevel = getCaloriesLevel(snack.calories);
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { getSnackTags, customTags } = useCustomTags();
   const favorited = isFavorite(snack.id);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -38,7 +40,17 @@ export function SnackCard({ snack, variant = 'grid' }: SnackCardProps) {
 
   const emoji = categoryEmojis[snack.category] || '🍴';
 
-  const displayTags = snack.tags.slice(0, 3);
+  const snackCustomTagIds = getSnackTags(snack.id);
+  const snackCustomTags = snackCustomTagIds
+    .map(id => customTags.find(t => t.id === id))
+    .filter(Boolean);
+  const allDisplayTags = [
+    ...snack.tags.slice(0, 2).map(tagId => {
+      const info = getTagInfo(tagId);
+      return info ? { name: info.name, color: info.color, bgColor: info.bgColor, isCustom: false } : null;
+    }),
+    ...snackCustomTags.slice(0, 1).map(tag => tag ? { name: tag.name, color: '', bgColor: '', isCustom: true, tagColor: tag.color } : null),
+  ].filter(Boolean);
 
   if (variant === 'horizontal') {
     return (
@@ -53,17 +65,24 @@ export function SnackCard({ snack, variant = 'grid' }: SnackCardProps) {
           <h3 className="font-semibold text-gray-800">{snack.name}</h3>
           <p className="text-sm text-gray-500 mt-0.5">{snack.servingSize}</p>
           <div className="flex flex-wrap gap-1 mt-2">
-            {displayTags.map((tag) => {
-              const tagInfo = getTagInfo(tag);
-              return tagInfo ? (
+            {allDisplayTags.map((tag, index) => tag ? (
+              tag.isCustom ? (
                 <span
-                  key={tag}
-                  className={`text-xs px-2 py-0.5 rounded-full ${tagInfo.bgColor} ${tagInfo.color}`}
+                  key={`custom-${index}`}
+                  className="text-xs px-2 py-0.5 rounded-full text-white"
+                  style={{ backgroundColor: (tag as any).tagColor }}
                 >
-                  {tagInfo.name}
+                  {tag.name}
                 </span>
-              ) : null;
-            })}
+              ) : (
+                <span
+                  key={`system-${index}`}
+                  className={`text-xs px-2 py-0.5 rounded-full ${tag.bgColor} ${tag.color}`}
+                >
+                  {tag.name}
+                </span>
+              )
+            ) : null)}
           </div>
           <div className="flex items-center gap-2 mt-2">
             <Flame className="w-4 h-4 text-orange-500" />
@@ -106,17 +125,24 @@ export function SnackCard({ snack, variant = 'grid' }: SnackCardProps) {
       <h3 className="font-semibold text-gray-800 text-lg">{snack.name}</h3>
       <p className="text-sm text-gray-500 mt-1">{snack.servingSize}</p>
       <div className="flex flex-wrap gap-1 mt-2">
-        {displayTags.map((tag) => {
-          const tagInfo = getTagInfo(tag);
-          return tagInfo ? (
+        {allDisplayTags.map((tag, index) => tag ? (
+          tag.isCustom ? (
             <span
-              key={tag}
-              className={`text-xs px-2 py-0.5 rounded-full ${tagInfo.bgColor} ${tagInfo.color}`}
+              key={`custom-${index}`}
+              className="text-xs px-2 py-0.5 rounded-full text-white"
+              style={{ backgroundColor: (tag as any).tagColor }}
             >
-              {tagInfo.name}
+              {tag.name}
             </span>
-          ) : null;
-        })}
+          ) : (
+            <span
+              key={`system-${index}`}
+              className={`text-xs px-2 py-0.5 rounded-full ${tag.bgColor} ${tag.color}`}
+            >
+              {tag.name}
+            </span>
+          )
+        ) : null)}
       </div>
       <div className="flex items-center justify-between mt-3">
         <div className="flex items-center gap-1.5">

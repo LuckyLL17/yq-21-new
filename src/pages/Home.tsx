@@ -1,27 +1,43 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Flame, Zap, Heart, ArrowRight, Info, Clock, ChevronLeft, ChevronRight, SearchX } from 'lucide-react';
 import { SearchBar } from '../components/SearchBar';
 import { SnackCard } from '../components/SnackCard';
 import { AdvancedFilter } from '../components/AdvancedFilter';
-import { findSnackByName, getAllCategories, filterSnacks, type SnackTag } from '../data/snacks';
+import { findSnackByName, getAllCategories, filterSnacks, type SnackTag, snacks } from '../data/snacks';
 import { useBrowsingHistory } from '../utils/useBrowsingHistory';
+import { useCustomTags } from '../utils/useCustomTags';
 
 export function Home() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('全部');
-  const [selectedTags, setSelectedTags] = useState<SnackTag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [minCalories, setMinCalories] = useState<number | undefined>();
   const [maxCalories, setMaxCalories] = useState<number | undefined>();
   const { history: browsingHistory } = useBrowsingHistory();
+  const { getSnackTags } = useCustomTags();
   const categories = ['全部', ...getAllCategories()];
   
-  const filteredSnacks = filterSnacks({
-    category: selectedCategory,
-    tags: selectedTags,
-    minCalories,
-    maxCalories,
-  }).slice(0, 8);
+  const filteredSnacks = useMemo(() => {
+    const systemTagIds = selectedTags.filter(t => !t.startsWith('custom_')) as SnackTag[];
+    const customTagIds = selectedTags.filter(t => t.startsWith('custom_'));
+    
+    let result = filterSnacks({
+      category: selectedCategory,
+      tags: systemTagIds,
+      minCalories,
+      maxCalories,
+    });
+    
+    if (customTagIds.length > 0) {
+      result = result.filter(snack => {
+        const snackCustomTags = getSnackTags(snack.id);
+        return customTagIds.every(tagId => snackCustomTags.includes(tagId));
+      });
+    }
+    
+    return result.slice(0, 8);
+  }, [selectedCategory, selectedTags, minCalories, maxCalories, getSnackTags]);
 
   const handleCaloriesChange = (min?: number, max?: number) => {
     setMinCalories(min);
