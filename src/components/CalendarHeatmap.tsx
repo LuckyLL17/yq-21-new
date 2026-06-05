@@ -8,6 +8,13 @@ interface CalendarHeatmapProps {
   refreshTrigger?: number;
 }
 
+function formatDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function CalendarHeatmap({
   selectedDate,
   onDateSelect,
@@ -55,7 +62,7 @@ export function CalendarHeatmap({
         day
       );
       days.push({
-        date: date.toISOString().split('T')[0],
+        date: formatDateString(date),
         day,
         isCurrentMonth: false,
       });
@@ -64,7 +71,7 @@ export function CalendarHeatmap({
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(currentMonth.year, currentMonth.month, day);
       days.push({
-        date: date.toISOString().split('T')[0],
+        date: formatDateString(date),
         day,
         isCurrentMonth: true,
       });
@@ -78,7 +85,7 @@ export function CalendarHeatmap({
         day
       );
       days.push({
-        date: date.toISOString().split('T')[0],
+        date: formatDateString(date),
         day,
         isCurrentMonth: false,
       });
