@@ -28,25 +28,29 @@ export function useBrowsingHistory() {
   }, []);
 
   const addToHistory = (snack: Snack) => {
-    const newHistory = history.filter(item => item.id !== snack.id);
-    newHistory.unshift({
-      id: snack.id,
-      name: snack.name,
-      category: snack.category,
-      calories: snack.calories,
-      servingSize: snack.servingSize,
-      timestamp: Date.now(),
+    setHistory(prevHistory => {
+      const newHistory = prevHistory.filter(item => item.id !== snack.id);
+      newHistory.unshift({
+        id: snack.id,
+        name: snack.name,
+        category: snack.category,
+        calories: snack.calories,
+        servingSize: snack.servingSize,
+        timestamp: Date.now(),
+      });
+      
+      const trimmedHistory = newHistory.slice(0, MAX_HISTORY_COUNT);
+      localStorage.setItem(BROWSING_HISTORY_KEY, JSON.stringify(trimmedHistory));
+      return trimmedHistory;
     });
-    
-    const trimmedHistory = newHistory.slice(0, MAX_HISTORY_COUNT);
-    setHistory(trimmedHistory);
-    localStorage.setItem(BROWSING_HISTORY_KEY, JSON.stringify(trimmedHistory));
   };
 
   const removeFromHistory = (id: string) => {
-    const newHistory = history.filter(item => item.id !== id);
-    setHistory(newHistory);
-    localStorage.setItem(BROWSING_HISTORY_KEY, JSON.stringify(newHistory));
+    setHistory(prevHistory => {
+      const newHistory = prevHistory.filter(item => item.id !== id);
+      localStorage.setItem(BROWSING_HISTORY_KEY, JSON.stringify(newHistory));
+      return newHistory;
+    });
   };
 
   const clearHistory = () => {
