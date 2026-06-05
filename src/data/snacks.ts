@@ -443,12 +443,37 @@ function calculateOverallScore(
   return overallScore;
 }
 
+function seededRandom(seed: number): () => number {
+  let s = seed;
+  return () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+}
+
+function shuffleArray<T>(array: T[], seed: number): T[] {
+  const arr = [...array];
+  const random = seededRandom(seed);
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function pickRandom<T>(array: T[], count: number, seed: number): T[] {
+  if (array.length <= count) return array;
+  const shuffled = shuffleArray(array, seed);
+  return shuffled.slice(0, count);
+}
+
 export function getAlternatives(
   snack: Snack,
   count: number = 3,
   options?: { shuffle?: boolean; seed?: number }
 ): AlternativeRecommendation[] {
   const candidates = snacks.filter(s => s.id !== snack.id && s.calories < snack.calories);
+  const seed = options?.seed ?? Date.now();
   
   const sameCategoryCandidates = candidates.filter(s => s.category === snack.category);
   const otherCategoryCandidates = candidates.filter(s => s.category !== snack.category);
@@ -486,33 +511,43 @@ export function getAlternatives(
   scoredSame.sort((a, b) => b.similarityScore - a.similarityScore);
   scoredOther.sort((a, b) => b.similarityScore - a.similarityScore);
   
-  let result: AlternativeRecommendation[] = [];
+  const sameCategoryTarget = Math.min(Math.ceil(count * 0.6), scoredSame.length);
+  const otherCategoryTarget = count - sameCategoryTarget;
   
-  const sameCategoryCount = Math.min(Math.ceil(count * 0.6), scoredSame.length);
-  result.push(...scoredSame.slice(0, sameCategoryCount));
+  let sameCategoryPicks: AlternativeRecommendation[];
+  let otherCategoryPicks: AlternativeRecommendation[];
   
-  const remainingCount = count - result.length;
-  if (remainingCount > 0) {
-    result.push(...scoredOther.slice(0, remainingCount));
+  if (options?.shuffle) {
+    const topSameCount = Math.max(Math.min(scoredSame.length, Math.ceil(count * 1.5)), sameCategoryTarget);
+    const topSame = scoredSame.slice(0, topSameCount);
+    sameCategoryPicks = pickRandom(topSame, sameCategoryTarget, seed);
+    
+    const topOtherCount = Math.max(Math.min(scoredOther.length, Math.ceil(count * 1.5)), otherCategoryTarget);
+    const topOther = scoredOther.slice(0, topOtherCount);
+    otherCategoryPicks = pickRandom(topOther, Math.max(0, otherCategoryTarget), seed + 1000);
+  } else {
+    sameCategoryPicks = scoredSame.slice(0, sameCategoryTarget);
+    otherCategoryPicks = scoredOther.slice(0, Math.max(0, otherCategoryTarget));
   }
+  
+  let result = [...sameCategoryPicks, ...otherCategoryPicks];
   
   if (result.length < count) {
-    const allRemaining = [...scoredSame.slice(sameCategoryCount), ...scoredOther.slice(Math.max(0, remainingCount))];
+    const usedIds = new Set(result.map(r => r.snack.id));
+    const allRemaining = [...scoredSame, ...scoredOther].filter(r => !usedIds.has(r.snack.id));
     allRemaining.sort((a, b) => b.similarityScore - a.similarityScore);
-    result.push(...allRemaining.slice(0, count - result.length));
+    
+    if (options?.shuffle) {
+      const remainingNeeded = count - result.length;
+      const topRemaining = allRemaining.slice(0, Math.min(allRemaining.length, remainingNeeded * 2));
+      result.push(...pickRandom(topRemaining, remainingNeeded, seed + 2000));
+    } else {
+      result.push(...allRemaining.slice(0, count - result.length));
+    }
   }
   
-  if (options?.shuffle && result.length > count) {
-    const seed = options.seed ?? Date.now();
-    const shuffleArray = <T>(array: T[], seed: number): T[] => {
-      const arr = [...array];
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor((Math.sin(seed + i) + 1) / 2 * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    };
-    result = shuffleArray(result, seed);
+  if (options?.shuffle) {
+    result = shuffleArray(result, seed + 3000);
   }
   
   return result.slice(0, count);
