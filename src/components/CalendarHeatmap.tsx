@@ -5,11 +5,13 @@ import { getCalendarHeatmapData, getHeatmapLevel } from '../data/records';
 interface CalendarHeatmapProps {
   selectedDate?: string;
   onDateSelect?: (date: string) => void;
+  refreshTrigger?: number;
 }
 
 export function CalendarHeatmap({
   selectedDate,
   onDateSelect,
+  refreshTrigger,
 }: CalendarHeatmapProps) {
   const [currentMonth, setCurrentMonth] = useState({
     year: new Date().getFullYear(),
@@ -18,9 +20,19 @@ export function CalendarHeatmap({
   const [heatmapData, setHeatmapData] = useState<Map<string, number>>(new Map());
 
   useEffect(() => {
+    if (selectedDate) {
+      const date = new Date(selectedDate);
+      setCurrentMonth({
+        year: date.getFullYear(),
+        month: date.getMonth(),
+      });
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
     const data = getCalendarHeatmapData(currentMonth.year, currentMonth.month);
     setHeatmapData(data);
-  }, [currentMonth]);
+  }, [currentMonth, refreshTrigger]);
 
   const calendarDays = useMemo(() => {
     const firstDay = new Date(currentMonth.year, currentMonth.month, 1);

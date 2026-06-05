@@ -16,38 +16,29 @@ import { getCaloriesLevel } from '../utils/calculator';
 interface DailyReportProps {
   date?: string;
   onDateChange?: (date: string) => void;
+  refreshTrigger?: number;
 }
 
 const DAILY_CALORIE_GOAL = 2000;
 
-export function DailyReport({ date: propDate, onDateChange }: DailyReportProps) {
-  const [selectedDate, setSelectedDate] = useState(
-    propDate || new Date().toISOString().split('T')[0]
-  );
+export function DailyReport({ date: propDate, onDateChange, refreshTrigger }: DailyReportProps) {
+  const currentDate = propDate || new Date().toISOString().split('T')[0];
   const [summary, setSummary] = useState<DailySummary | null>(null);
 
   useEffect(() => {
-    const dailySummary = getDailySummary(selectedDate);
+    const dailySummary = getDailySummary(currentDate);
     setSummary(dailySummary);
-  }, [selectedDate]);
-
-  useEffect(() => {
-    if (propDate && propDate !== selectedDate) {
-      setSelectedDate(propDate);
-    }
-  }, [propDate, selectedDate]);
+  }, [currentDate, refreshTrigger]);
 
   const changeDate = (days: number) => {
-    const date = new Date(selectedDate);
+    const date = new Date(currentDate);
     date.setDate(date.getDate() + days);
     const newDate = date.toISOString().split('T')[0];
-    setSelectedDate(newDate);
     onDateChange?.(newDate);
   };
 
   const goToToday = () => {
     const today = new Date().toISOString().split('T')[0];
-    setSelectedDate(today);
     onDateChange?.(today);
   };
 
@@ -102,10 +93,10 @@ export function DailyReport({ date: propDate, onDateChange }: DailyReportProps) 
           </button>
           <div className="text-center">
             <div className="font-semibold text-gray-800">
-              {formatDate(selectedDate)}
+              {formatDate(currentDate)}
             </div>
             <div className="text-sm text-gray-500">
-              {getWeekday(selectedDate)}
+              {getWeekday(currentDate)}
             </div>
           </div>
           <button

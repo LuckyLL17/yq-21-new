@@ -78,12 +78,14 @@ export function Records() {
               <DailyReport
                 date={selectedDate}
                 onDateChange={setSelectedDate}
+                refreshTrigger={refreshTrigger}
               />
             </div>
             <div className="lg:col-span-2 space-y-6">
               <CalendarHeatmap
                 selectedDate={selectedDate}
                 onDateSelect={setSelectedDate}
+                refreshTrigger={refreshTrigger}
               />
               <RecordList date={selectedDate} refreshTrigger={refreshTrigger} />
             </div>
@@ -97,12 +99,14 @@ export function Records() {
               <DailyReport
                 date={selectedDate}
                 onDateChange={setSelectedDate}
+                refreshTrigger={refreshTrigger}
               />
             </div>
             <div className="lg:col-span-2">
               <CalendarHeatmap
                 selectedDate={selectedDate}
                 onDateSelect={setSelectedDate}
+                refreshTrigger={refreshTrigger}
               />
             </div>
           </div>
@@ -115,6 +119,7 @@ export function Records() {
               <DailyReport
                 date={selectedDate}
                 onDateChange={setSelectedDate}
+                refreshTrigger={refreshTrigger}
               />
             </div>
             <div className="lg:col-span-2">
