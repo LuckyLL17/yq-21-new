@@ -85,3 +85,7 @@ export function getExercisesForDisplay(count: number = 6): Exercise[] {
   const displayIds = ['stairs', 'walking', 'running', 'cycling', 'swimming', 'jumping-rope'];
   return displayIds.map(id => exercises.find(e => e.id === id)!).filter(Boolean).slice(0, count);
 }
+
+export function getAllExercises(): Exercise[] {
+  return exercises;
+}

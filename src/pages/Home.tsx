@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Flame, Zap, Heart, ArrowRight, Info } from 'lucide-react';
 import { SearchBar } from '../components/SearchBar';

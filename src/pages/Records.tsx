@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, List, LayoutGrid, Flame, History, X } from 'lucide-react';
+import { Calendar, LayoutGrid, Flame, History, X } from 'lucide-react';
 import { RecordForm } from '../components/RecordForm';
 import { DailyReport } from '../components/DailyReport';
 import { CalendarHeatmap } from '../components/CalendarHeatmap';
