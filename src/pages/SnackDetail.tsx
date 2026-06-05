@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Flame, Scale, Droplets, Wheat, ArrowLeft, Lightbulb, Dumbbell, User, X, Download, ChevronDown, Heart, Folder, Check, Tag, Plus, Edit2, Trash2, Zap } from 'lucide-react';
+import { Flame, Scale, Droplets, Wheat, ArrowLeft, Lightbulb, Dumbbell, User, X, Download, ChevronDown, Heart, Folder, Check, Tag, Plus, Edit2, Trash2, Zap, RefreshCw, Settings } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import html2canvas from 'html2canvas';
-import { getSnackById, getAlternatives, TAG_INFO, getTagInfo } from '../data/snacks';
+import { getSnackById, getAlternatives, TAG_INFO, getTagInfo, type AlternativeRecommendation } from '../data/snacks';
 import { getAllExercises, getIntensityLabel, type ExerciseIntensity } from '../data/exercises';
 import { getCaloriesLevel, getWeightOptions, kcalToKj, type EnergyUnit, ERROR_MARGIN_DESCRIPTION } from '../utils/calculator';
 import { ExerciseCard } from '../components/ExerciseCard';
@@ -25,7 +25,12 @@ export function SnackDetail() {
   const [newTagName, setNewTagName] = useState('');
   const [newTagColor, setNewTagColor] = useState('#3B82F6');
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
+  const [recommendationCount, setRecommendationCount] = useState(3);
+  const [refreshSeed, setRefreshSeed] = useState(Date.now());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showCountMenu, setShowCountMenu] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const countMenuRef = useRef<HTMLDivElement>(null);
   const { addToHistory } = useBrowsingHistory();
   const { isFavorite, toggleFavorite, categories, setSnackCategories, favorites } = useFavorites();
   const { 
@@ -40,7 +45,24 @@ export function SnackDetail() {
   } = useCustomTags();
   
   const snack = id ? getSnackById(id) : undefined;
-  const alternatives = snack ? getAlternatives(snack, 3) : [];
+  
+  const alternatives: AlternativeRecommendation[] = useMemo(() => {
+    if (!snack) return [];
+    return getAlternatives(snack, recommendationCount, { shuffle: true, seed: refreshSeed });
+  }, [snack, recommendationCount, refreshSeed]);
+
+  const handleRefreshRecommendations = () => {
+    setIsRefreshing(true);
+    setRefreshSeed(Date.now());
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
+
+  const handleCountChange = (count: number) => {
+    setRecommendationCount(count);
+    setShowCountMenu(false);
+  };
+
+  const countOptions = [3, 5, 8, 10];
   const allExercises = getAllExercises();
   const caloriesLevel = snack ? getCaloriesLevel(snack.calories) : null;
   const favorited = snack ? isFavorite(snack.id) : false;
@@ -669,24 +691,75 @@ export function SnackDetail() {
 
           {alternatives.length > 0 && (
             <div className="bg-white rounded-3xl p-6 md:p-8 card-shadow">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                  <Lightbulb className="w-5 h-5 text-green-600" />
+              <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                    <Lightbulb className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h2 className="font-poppins text-xl font-bold text-gray-800">
+                      更低热量的替代品推荐
+                    </h2>
+                    <p className="text-sm text-gray-500">满足口腹之欲的同时减少热量摄入</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="font-poppins text-xl font-bold text-gray-800">
-                    更低热量的替代品推荐
-                  </h2>
-                  <p className="text-sm text-gray-500">满足口腹之欲的同时减少热量摄入</p>
+                
+                <div className="flex items-center gap-2">
+                  <div className="relative" ref={countMenuRef}>
+                    <button
+                      onClick={() => setShowCountMenu(!showCountMenu)}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                    >
+                      <Settings className="w-4 h-4" />
+                      <span className="text-sm">推荐 {recommendationCount} 个</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                    
+                    {showCountMenu && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setShowCountMenu(false)}
+                        />
+                        <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                          <div className="px-4 py-2 border-b border-gray-100">
+                            <p className="text-xs font-medium text-gray-500">推荐数量</p>
+                          </div>
+                          {countOptions.map((count) => (
+                            <button
+                              key={count}
+                              onClick={() => handleCountChange(count)}
+                              className={`w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center justify-between transition-colors ${
+                                recommendationCount === count ? 'bg-primary-50 text-primary-600' : 'text-gray-700'
+                              }`}
+                            >
+                              <span className="text-sm">{count} 个</span>
+                              {recommendationCount === count && (
+                                <Check className="w-4 h-4" />
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  
+                  <button
+                    onClick={handleRefreshRecommendations}
+                    disabled={isRefreshing}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 font-medium rounded-xl hover:bg-green-200 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    <span className="text-sm">换一批</span>
+                  </button>
                 </div>
               </div>
               
-              <div className="grid md:grid-cols-3 gap-4">
+              <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-opacity duration-300 ${isRefreshing ? 'opacity-50' : 'opacity-100'}`}>
                 {alternatives.map((alt) => (
                   <AlternativeCard
-                    key={alt.id}
-                    snack={alt}
-                    originalCalories={snack.calories}
+                    key={alt.snack.id + '-' + refreshSeed}
+                    recommendation={alt}
                   />
                 ))}
               </div>

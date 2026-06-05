@@ -346,20 +346,176 @@ export function getSnackById(id: string): Snack | undefined {
   return snacks.find(snack => snack.id === id);
 }
 
-export function getAlternatives(snack: Snack, count: number = 3): Snack[] {
-  const sameCategoryAlternatives = snacks
-    .filter(s => s.id !== snack.id && s.category === snack.category && s.calories < snack.calories)
-    .sort((a, b) => Math.abs(a.calories - snack.calories / 2) - Math.abs(b.calories - snack.calories / 2));
+export interface AlternativeRecommendation {
+  snack: Snack;
+  similarityScore: number;
+  tasteSimilarity: '高' | '中' | '低';
+  reasons: string[];
+  isSameCategory: boolean;
+  caloriesSaved: number;
+  caloriesSavedPercent: number;
+}
+
+function calculateTasteSimilarity(snack1: Snack, snack2: Snack): number {
+  const tags1 = new Set(snack1.tags);
+  const tags2 = new Set(snack2.tags);
+  const intersection = new Set([...tags1].filter(x => tags2.has(x)));
+  const union = new Set([...tags1, ...tags2]);
+  return union.size === 0 ? 0 : intersection.size / union.size;
+}
+
+function calculateNutritionSimilarity(snack1: Snack, snack2: Snack): number {
+  const maxCalories = Math.max(snack1.calories, snack2.calories);
+  const caloriesDiff = Math.abs(snack1.calories - snack2.calories) / maxCalories;
   
-  if (sameCategoryAlternatives.length >= count) {
-    return sameCategoryAlternatives.slice(0, count);
+  const maxProtein = Math.max(snack1.protein, snack2.protein) || 1;
+  const proteinDiff = Math.abs(snack1.protein - snack2.protein) / maxProtein;
+  
+  const maxFat = Math.max(snack1.fat, snack2.fat) || 1;
+  const fatDiff = Math.abs(snack1.fat - snack2.fat) / maxFat;
+  
+  const maxCarbs = Math.max(snack1.carbs, snack2.carbs) || 1;
+  const carbsDiff = Math.abs(snack1.carbs - snack2.carbs) / maxCarbs;
+  
+  const avgDiff = (caloriesDiff * 0.3 + proteinDiff * 0.25 + fatDiff * 0.25 + carbsDiff * 0.2);
+  return Math.max(0, 1 - avgDiff);
+}
+
+function getTasteSimilarityLabel(score: number): '高' | '中' | '低' {
+  if (score >= 0.6) return '高';
+  if (score >= 0.3) return '中';
+  return '低';
+}
+
+function generateReasons(original: Snack, alternative: Snack, isSameCategory: boolean): string[] {
+  const reasons: string[] = [];
+  
+  if (isSameCategory) {
+    reasons.push(`同属${original.category}，口味更接近`);
   }
   
-  const otherAlternatives = snacks
-    .filter(s => s.id !== snack.id && s.category !== snack.category && s.calories < snack.calories)
-    .sort((a, b) => Math.abs(a.calories - snack.calories / 2) - Math.abs(b.calories - snack.calories / 2));
+  const commonTags = original.tags.filter(tag => alternative.tags.includes(tag));
+  if (commonTags.length > 0) {
+    const tagNames = commonTags.slice(0, 3).map(tag => {
+      const info = TAG_INFO.find(t => t.id === tag);
+      return info ? info.name : tag;
+    });
+    reasons.push(`共同特点：${tagNames.join('、')}`);
+  }
   
-  return [...sameCategoryAlternatives, ...otherAlternatives].slice(0, count);
+  const caloriesSaved = original.calories - alternative.calories;
+  const savedPercent = Math.round((caloriesSaved / original.calories) * 100);
+  reasons.push(`热量减少 ${savedPercent}%，少摄入 ${caloriesSaved} 千卡`);
+  
+  if (alternative.tags.includes('low-calorie')) {
+    reasons.push('低热量更健康');
+  }
+  if (alternative.tags.includes('high-protein')) {
+    reasons.push('高蛋白更饱腹');
+  }
+  if (alternative.tags.includes('low-fat')) {
+    reasons.push('低脂更轻盈');
+  }
+  if (alternative.tags.includes('low-sugar')) {
+    reasons.push('低糖无负担');
+  }
+  
+  return reasons.slice(0, 3);
+}
+
+function calculateOverallScore(
+  original: Snack,
+  alternative: Snack,
+  isSameCategory: boolean
+): number {
+  const tasteScore = calculateTasteSimilarity(original, alternative);
+  const nutritionScore = calculateNutritionSimilarity(original, alternative);
+  
+  const caloriesSaved = original.calories - alternative.calories;
+  const caloriesSavedPercent = caloriesSaved / original.calories;
+  
+  const categoryBonus = isSameCategory ? 0.2 : 0;
+  
+  const healthScore = Math.min(caloriesSavedPercent * 1.5, 0.5);
+  
+  const overallScore = (tasteScore * 0.35 + nutritionScore * 0.25 + healthScore * 0.2) + categoryBonus;
+  
+  return overallScore;
+}
+
+export function getAlternatives(
+  snack: Snack,
+  count: number = 3,
+  options?: { shuffle?: boolean; seed?: number }
+): AlternativeRecommendation[] {
+  const candidates = snacks.filter(s => s.id !== snack.id && s.calories < snack.calories);
+  
+  const sameCategoryCandidates = candidates.filter(s => s.category === snack.category);
+  const otherCategoryCandidates = candidates.filter(s => s.category !== snack.category);
+  
+  const scoredSame = sameCategoryCandidates.map(alt => {
+    const score = calculateOverallScore(snack, alt, true);
+    const tasteSim = calculateTasteSimilarity(snack, alt);
+    const caloriesSaved = snack.calories - alt.calories;
+    return {
+      snack: alt,
+      similarityScore: score,
+      tasteSimilarity: getTasteSimilarityLabel(tasteSim),
+      reasons: generateReasons(snack, alt, true),
+      isSameCategory: true,
+      caloriesSaved,
+      caloriesSavedPercent: Math.round((caloriesSaved / snack.calories) * 100),
+    };
+  });
+  
+  const scoredOther = otherCategoryCandidates.map(alt => {
+    const score = calculateOverallScore(snack, alt, false);
+    const tasteSim = calculateTasteSimilarity(snack, alt);
+    const caloriesSaved = snack.calories - alt.calories;
+    return {
+      snack: alt,
+      similarityScore: score,
+      tasteSimilarity: getTasteSimilarityLabel(tasteSim),
+      reasons: generateReasons(snack, alt, false),
+      isSameCategory: false,
+      caloriesSaved,
+      caloriesSavedPercent: Math.round((caloriesSaved / snack.calories) * 100),
+    };
+  });
+  
+  scoredSame.sort((a, b) => b.similarityScore - a.similarityScore);
+  scoredOther.sort((a, b) => b.similarityScore - a.similarityScore);
+  
+  let result: AlternativeRecommendation[] = [];
+  
+  const sameCategoryCount = Math.min(Math.ceil(count * 0.6), scoredSame.length);
+  result.push(...scoredSame.slice(0, sameCategoryCount));
+  
+  const remainingCount = count - result.length;
+  if (remainingCount > 0) {
+    result.push(...scoredOther.slice(0, remainingCount));
+  }
+  
+  if (result.length < count) {
+    const allRemaining = [...scoredSame.slice(sameCategoryCount), ...scoredOther.slice(Math.max(0, remainingCount))];
+    allRemaining.sort((a, b) => b.similarityScore - a.similarityScore);
+    result.push(...allRemaining.slice(0, count - result.length));
+  }
+  
+  if (options?.shuffle && result.length > count) {
+    const seed = options.seed ?? Date.now();
+    const shuffleArray = <T>(array: T[], seed: number): T[] => {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor((Math.sin(seed + i) + 1) / 2 * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    };
+    result = shuffleArray(result, seed);
+  }
+  
+  return result.slice(0, count);
 }
 
 export function getPopularSnacks(count: number = 8): Snack[] {
