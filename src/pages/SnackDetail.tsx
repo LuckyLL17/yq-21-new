@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Flame, Scale, Droplets, Wheat, ArrowLeft, Lightbulb, Dumbbell, User, X, Download, ChevronDown } from 'lucide-react';
+import { Flame, Scale, Droplets, Wheat, ArrowLeft, Lightbulb, Dumbbell, User, X, Download, ChevronDown, Heart, Folder, Check } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import html2canvas from 'html2canvas';
 import { getSnackById, getAlternatives } from '../data/snacks';
@@ -9,6 +9,7 @@ import { getCaloriesLevel, getWeightOptions } from '../utils/calculator';
 import { ExerciseCard } from '../components/ExerciseCard';
 import { AlternativeCard } from '../components/AlternativeCard';
 import { useBrowsingHistory } from '../utils/useBrowsingHistory';
+import { useFavorites } from '../utils/useFavorites';
 
 export function SnackDetail() {
   const { id } = useParams<{ id: string }>();
@@ -16,19 +17,38 @@ export function SnackDetail() {
   const [weight, setWeight] = useState(65);
   const [showAllExercises, setShowAllExercises] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const { addToHistory } = useBrowsingHistory();
+  const { isFavorite, toggleFavorite, categories, setSnackCategories, favorites } = useFavorites();
   
   const snack = id ? getSnackById(id) : undefined;
   const alternatives = snack ? getAlternatives(snack, 3) : [];
   const allExercises = getAllExercises();
   const caloriesLevel = snack ? getCaloriesLevel(snack.calories) : null;
+  const favorited = snack ? isFavorite(snack.id) : false;
+  const favoriteItem = snack ? favorites.find(f => f.snackId === snack.id) : null;
+  const selectedCategoryIds = favoriteItem?.categoryIds || [];
 
   useEffect(() => {
     if (snack) {
       addToHistory(snack);
     }
   }, [snack, addToHistory]);
+
+  const handleToggleFavorite = () => {
+    if (snack) {
+      toggleFavorite(snack);
+    }
+  };
+
+  const handleCategoryToggle = (categoryId: string) => {
+    if (!snack) return;
+    const newIds = selectedCategoryIds.includes(categoryId)
+      ? selectedCategoryIds.filter(id => id !== categoryId)
+      : [...selectedCategoryIds, categoryId];
+    setSnackCategories(snack.id, newIds);
+  };
 
   if (!snack) {
     return (
@@ -108,14 +128,77 @@ export function SnackDetail() {
             <span>返回搜索</span>
           </button>
           
-          <button
-            onClick={handleGenerateImage}
-            disabled={isGeneratingImage}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-white font-medium rounded-xl hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Download className="w-5 h-5" />
-            <span>{isGeneratingImage ? '生成中...' : '保存分析'}</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <button
+                onClick={handleToggleFavorite}
+                className={`inline-flex items-center gap-2 px-4 py-2 font-medium rounded-xl transition-colors ${
+                  favorited
+                    ? 'bg-red-50 text-red-500 hover:bg-red-100'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <Heart className="w-5 h-5" fill={favorited ? 'currentColor' : 'none'} />
+                <span>{favorited ? '已收藏' : '收藏'}</span>
+              </button>
+              
+              {favorited && (
+                <button
+                  onClick={() => setShowCategoryMenu(!showCategoryMenu)}
+                  className="ml-1 p-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                  title="管理分类"
+                >
+                  <Folder className="w-5 h-5" />
+                </button>
+              )}
+
+              {showCategoryMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowCategoryMenu(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-800">选择分类</p>
+                    </div>
+                    {categories.filter(c => c.id !== 'all').map((category) => (
+                      <button
+                        key={category.id}
+                        onClick={() => handleCategoryToggle(category.id)}
+                        className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center justify-between transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: category.color }}
+                          />
+                          <span className="text-sm text-gray-700">{category.name}</span>
+                        </div>
+                        {selectedCategoryIds.includes(category.id) && (
+                          <Check className="w-4 h-4 text-primary-500" />
+                        )}
+                      </button>
+                    ))}
+                    {categories.filter(c => c.id !== 'all').length === 0 && (
+                      <div className="px-4 py-3 text-center text-sm text-gray-500">
+                        暂无自定义分类
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <button
+              onClick={handleGenerateImage}
+              disabled={isGeneratingImage}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-white font-medium rounded-xl hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-5 h-5" />
+              <span>{isGeneratingImage ? '生成中...' : '保存分析'}</span>
+            </button>
+          </div>
         </div>
 
         <div ref={contentRef}>

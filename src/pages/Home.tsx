@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Flame, Zap, Heart, ArrowRight, Info, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SearchBar } from '../components/SearchBar';
 import { SnackCard } from '../components/SnackCard';
-import { getPopularSnacks, findSnackByName, getAllCategories, getSnacksByCategory } from '../data/snacks';
+import { findSnackByName, getAllCategories, getSnacksByCategory } from '../data/snacks';
 import { useBrowsingHistory } from '../utils/useBrowsingHistory';
 
 export function Home() {
@@ -11,7 +11,6 @@ export function Home() {
   const [selectedCategory, setSelectedCategory] = useState('全部');
   const { history: browsingHistory } = useBrowsingHistory();
   const categories = ['全部', ...getAllCategories()];
-  const popularSnacks = getPopularSnacks(8);
   const categorySnacks = getSnacksByCategory(selectedCategory).slice(0, 8);
 
   const handleQuickSearch = (keyword: string) => {

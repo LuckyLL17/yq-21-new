@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Flame, ArrowLeft, History, Palette, Check } from 'lucide-react';
+import { Flame, ArrowLeft, History, Palette, Check, Heart } from 'lucide-react';
 import { SearchBar } from './SearchBar';
 import { useTheme, themes } from '../utils/ThemeContext';
+import { useFavorites } from '../utils/useFavorites';
 
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === '/';
   const isRecords = location.pathname === '/records';
+  const isFavorites = location.pathname === '/favorites';
   const { currentTheme, setTheme } = useTheme();
+  const { favorites } = useFavorites();
   const [showThemeMenu, setShowThemeMenu] = useState(false);
 
   return (
@@ -45,6 +48,22 @@ export function Header() {
               首页
             </Link>
             <Link
+              to="/favorites"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                isFavorites
+                  ? 'bg-primary-50 text-primary-600'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Heart className="w-4 h-4" />
+              我的收藏
+              {favorites.length > 0 && (
+                <span className="text-xs bg-primary-500 text-white px-1.5 py-0.5 rounded-full">
+                  {favorites.length}
+                </span>
+              )}
+            </Link>
+            <Link
               to="/records"
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                 isRecords
@@ -57,7 +76,7 @@ export function Header() {
             </Link>
           </nav>
 
-          {!isHome && !isRecords && (
+          {!isHome && !isRecords && !isFavorites && (
             <div className="flex-1 max-w-md">
               <SearchBar variant="normal" />
             </div>
@@ -106,10 +125,21 @@ export function Header() {
           </div>
 
           <Link
+            to="/favorites"
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
+          >
+            <Heart className={`w-5 h-5 ${isFavorites ? 'text-primary-500' : 'text-gray-600'}`} />
+            {favorites.length > 0 && (
+              <span className="absolute -top-1 -right-1 text-xs bg-red-500 text-white w-4 h-4 flex items-center justify-center rounded-full">
+                {favorites.length > 9 ? '9+' : favorites.length}
+              </span>
+            )}
+          </Link>
+          <Link
             to="/records"
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            <History className="w-5 h-5 text-gray-600" />
+            <History className={`w-5 h-5 ${isRecords ? 'text-primary-500' : 'text-gray-600'}`} />
           </Link>
         </div>
       </div>
