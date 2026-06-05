@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Flame, Scale, Droplets, Wheat, ArrowLeft, Lightbulb, Dumbbell, User, X, Download, ChevronDown } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
@@ -8,6 +8,7 @@ import { getAllExercises } from '../data/exercises';
 import { getCaloriesLevel, getWeightOptions } from '../utils/calculator';
 import { ExerciseCard } from '../components/ExerciseCard';
 import { AlternativeCard } from '../components/AlternativeCard';
+import { useBrowsingHistory } from '../utils/useBrowsingHistory';
 
 export function SnackDetail() {
   const { id } = useParams<{ id: string }>();
@@ -16,11 +17,18 @@ export function SnackDetail() {
   const [showAllExercises, setShowAllExercises] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const { addToHistory } = useBrowsingHistory();
   
   const snack = id ? getSnackById(id) : undefined;
   const alternatives = snack ? getAlternatives(snack, 3) : [];
   const allExercises = getAllExercises();
   const caloriesLevel = snack ? getCaloriesLevel(snack.calories) : null;
+
+  useEffect(() => {
+    if (snack) {
+      addToHistory(snack);
+    }
+  }, [snack, addToHistory]);
 
   if (!snack) {
     return (

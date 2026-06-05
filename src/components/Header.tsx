@@ -1,12 +1,16 @@
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Flame, ArrowLeft, History } from 'lucide-react';
+import { Flame, ArrowLeft, History, Palette, Check } from 'lucide-react';
 import { SearchBar } from './SearchBar';
+import { useTheme, themes } from '../utils/ThemeContext';
 
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === '/';
   const isRecords = location.pathname === '/records';
+  const { currentTheme, setTheme } = useTheme();
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-100">
@@ -58,6 +62,48 @@ export function Header() {
               <SearchBar variant="normal" />
             </div>
           )}
+
+          <div className="relative">
+            <button
+              onClick={() => setShowThemeMenu(!showThemeMenu)}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              title="切换主题"
+            >
+              <Palette className="w-5 h-5 text-gray-600" />
+            </button>
+            
+            {showThemeMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowThemeMenu(false)}
+                />
+                <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                  {Object.entries(themes).map(([key, theme]) => (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        setTheme(key);
+                        setShowThemeMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center justify-between transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: theme.primary[500] }}
+                        />
+                        <span className="text-sm text-gray-700">{theme.name}</span>
+                      </div>
+                      {currentTheme === key && (
+                        <Check className="w-4 h-4 text-primary-600" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
 
           <Link
             to="/records"

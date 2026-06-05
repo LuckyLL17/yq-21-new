@@ -1,17 +1,34 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Zap, Heart, ArrowRight, Info } from 'lucide-react';
+import { Flame, Zap, Heart, ArrowRight, Info, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SearchBar } from '../components/SearchBar';
 import { SnackCard } from '../components/SnackCard';
-import { getPopularSnacks, findSnackByName } from '../data/snacks';
+import { getPopularSnacks, findSnackByName, getAllCategories, getSnacksByCategory } from '../data/snacks';
+import { useBrowsingHistory } from '../utils/useBrowsingHistory';
 
 export function Home() {
   const navigate = useNavigate();
+  const [selectedCategory, setSelectedCategory] = useState('全部');
+  const { history: browsingHistory } = useBrowsingHistory();
+  const categories = ['全部', ...getAllCategories()];
   const popularSnacks = getPopularSnacks(8);
+  const categorySnacks = getSnacksByCategory(selectedCategory).slice(0, 8);
 
   const handleQuickSearch = (keyword: string) => {
     const results = findSnackByName(keyword);
     if (results.length > 0) {
       navigate(`/snack/${results[0].id}`);
+    }
+  };
+
+  const scrollCategories = (direction: 'left' | 'right') => {
+    const container = document.getElementById('category-scroll');
+    if (container) {
+      const scrollAmount = 200;
+      container.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -62,7 +79,7 @@ export function Home() {
 
       <section className="py-12 md:py-16 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex items-end justify-between mb-8">
+          <div className="flex items-end justify-between mb-6">
             <div>
               <h2 className="font-poppins text-2xl md:text-3xl font-bold text-gray-800">
                 热门零食
@@ -70,14 +87,91 @@ export function Home() {
               <p className="text-gray-500 mt-2">点击查看详细热量信息</p>
             </div>
           </div>
+
+          <div className="relative mb-8">
+            <button
+              onClick={() => scrollCategories('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <button
+              onClick={() => scrollCategories('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-600" />
+            </button>
+            
+            <div
+              id="category-scroll"
+              className="flex gap-3 overflow-x-auto scrollbar-hide px-6 py-2"
+            >
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-5 py-2.5 rounded-full font-medium text-sm whitespace-nowrap transition-all ${
+                    selectedCategory === category
+                      ? 'bg-primary-500 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {popularSnacks.map((snack) => (
+            {categorySnacks.map((snack) => (
               <SnackCard key={snack.id} snack={snack} />
             ))}
           </div>
         </div>
       </section>
+
+      {browsingHistory.length > 0 && (
+        <section className="py-12 md:py-16 bg-gray-50">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="flex items-end justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-primary-600" />
+                </div>
+                <div>
+                  <h2 className="font-poppins text-2xl md:text-3xl font-bold text-gray-800">
+                    最近浏览
+                  </h2>
+                  <p className="text-gray-500 mt-1">继续查看你感兴趣的零食</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+              {browsingHistory.slice(0, 10).map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => navigate(`/snack/${item.id}`)}
+                  className="flex-shrink-0 w-40 bg-white rounded-2xl p-4 card-shadow card-hover cursor-pointer"
+                >
+                  <div className="w-full h-20 rounded-xl bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center mb-3">
+                    <span className="text-4xl">🍴</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-800 text-sm mb-1 line-clamp-1">
+                    {item.name}
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">{item.category}</span>
+                    <span className="text-sm font-bold text-primary-600">
+                      {item.calories} 卡
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="py-12 md:py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">

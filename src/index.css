@@ -3,6 +3,30 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-primary-50: #ecfdf5;
+    --color-primary-100: #d1fae5;
+    --color-primary-200: #a7f3d0;
+    --color-primary-300: #6ee7b7;
+    --color-primary-400: #34d399;
+    --color-primary-500: #10b981;
+    --color-primary-600: #059669;
+    --color-primary-700: #047857;
+    --color-primary-800: #065f46;
+    --color-primary-900: #064e3b;
+    
+    --color-accent-50: #fff7ed;
+    --color-accent-100: #ffedd5;
+    --color-accent-200: #fed7aa;
+    --color-accent-300: #fdba74;
+    --color-accent-400: #fb923c;
+    --color-accent-500: #f97316;
+    --color-accent-600: #ea580c;
+    --color-accent-700: #c2410c;
+    --color-accent-800: #9a3412;
+    --color-accent-900: #7c2d12;
+  }
+  
   html {
     font-family: 'Inter', sans-serif;
     scroll-behavior: smooth;
@@ -14,7 +38,7 @@
 
 @layer components {
   .gradient-bg {
-    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #fff7ed 100%);
+    background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-primary-100) 50%, var(--color-accent-50) 100%);
   }
   .card-shadow {
     box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
@@ -25,5 +49,12 @@
   .card-hover:hover {
     transform: translateY(-4px);
     box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.15);
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }

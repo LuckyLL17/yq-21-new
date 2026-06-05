@@ -3,20 +3,23 @@ import { Header } from './components/Header';
 import { Home } from './pages/Home';
 import { SnackDetail } from './pages/SnackDetail';
 import { Records } from './pages/Records';
+import { ThemeProvider } from './utils/ThemeContext';
 import './index.css';
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/snack/:id" element={<SnackDetail />} />
-          <Route path="/records" element={<Records />} />
-        </Routes>
-      </div>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/snack/:id" element={<SnackDetail />} />
+            <Route path="/records" element={<Records />} />
+          </Routes>
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 

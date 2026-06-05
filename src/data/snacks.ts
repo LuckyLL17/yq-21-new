@@ -345,3 +345,10 @@ export function findSnacksGroupedByCategory(name: string): Record<string, Snack[
 export function getAllCategories(): string[] {
   return [...new Set(snacks.map(s => s.category))];
 }
+
+export function getSnacksByCategory(category: string): Snack[] {
+  if (category === '全部') {
+    return snacks;
+  }
+  return snacks.filter(s => s.category === category);
+}
