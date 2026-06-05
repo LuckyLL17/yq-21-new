@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Flame, ArrowLeft, History, Palette, Check, Heart } from 'lucide-react';
+import { Flame, ArrowLeft, History, Palette, Check, Heart, Dumbbell } from 'lucide-react';
 import { SearchBar } from './SearchBar';
 import { useTheme, themes } from '../utils/ThemeContext';
 import { useFavorites } from '../utils/useFavorites';
@@ -11,6 +11,7 @@ export function Header() {
   const isHome = location.pathname === '/';
   const isRecords = location.pathname === '/records';
   const isFavorites = location.pathname === '/favorites';
+  const isExercisePlan = location.pathname === '/exercise-plan';
   const { currentTheme, setTheme } = useTheme();
   const { favorites } = useFavorites();
   const [showThemeMenu, setShowThemeMenu] = useState(false);
@@ -48,6 +49,17 @@ export function Header() {
               首页
             </Link>
             <Link
+              to="/exercise-plan"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                isExercisePlan
+                  ? 'bg-primary-50 text-primary-600'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Dumbbell className="w-4 h-4" />
+              运动方案
+            </Link>
+            <Link
               to="/favorites"
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                 isFavorites
@@ -76,7 +88,7 @@ export function Header() {
             </Link>
           </nav>
 
-          {!isHome && !isRecords && !isFavorites && (
+          {!isHome && !isRecords && !isFavorites && !isExercisePlan && (
             <div className="flex-1 max-w-md">
               <SearchBar variant="normal" />
             </div>
@@ -124,6 +136,12 @@ export function Header() {
             )}
           </div>
 
+          <Link
+            to="/exercise-plan"
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <Dumbbell className={`w-5 h-5 ${isExercisePlan ? 'text-primary-500' : 'text-gray-600'}`} />
+          </Link>
           <Link
             to="/favorites"
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors relative"

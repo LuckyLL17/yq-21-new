@@ -4,6 +4,7 @@ import { Home } from './pages/Home';
 import { SnackDetail } from './pages/SnackDetail';
 import { Records } from './pages/Records';
 import { Favorites } from './pages/Favorites';
+import { ExercisePlan } from './pages/ExercisePlan';
 import { ThemeProvider } from './utils/ThemeContext';
 import { FavoritesProvider } from './utils/useFavorites';
 import './index.css';
@@ -20,6 +21,7 @@ function App() {
               <Route path="/snack/:id" element={<SnackDetail />} />
               <Route path="/records" element={<Records />} />
               <Route path="/favorites" element={<Favorites />} />
+              <Route path="/exercise-plan" element={<ExercisePlan />} />
             </Routes>
           </div>
         </Router>
