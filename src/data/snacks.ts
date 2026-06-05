@@ -309,3 +309,39 @@ export function getPopularSnacks(count: number = 8): Snack[] {
   const popularIds = ['chips-original', 'chocolate-milk', 'ice-cream-vanilla', 'candy-gummy', 'nuts-mixed', 'milk-tea', 'cola', 'instant-noodles'];
   return popularIds.map(id => snacks.find(s => s.id === id)!).filter(Boolean).slice(0, count);
 }
+
+export function getHotSearchKeywords(): { keyword: string; count: number }[] {
+  return [
+    { keyword: '薯片', count: 2356 },
+    { keyword: '巧克力', count: 1987 },
+    { keyword: '奶茶', count: 1756 },
+    { keyword: '冰淇淋', count: 1543 },
+    { keyword: '可乐', count: 1324 },
+    { keyword: '坚果', count: 1156 },
+    { keyword: '饼干', count: 987 },
+    { keyword: '方便面', count: 876 },
+  ];
+}
+
+export function findSnacksGroupedByCategory(name: string): Record<string, Snack[]> {
+  const searchLower = name.toLowerCase().trim();
+  const results = snacks.filter(snack => 
+    snack.name.toLowerCase().includes(searchLower) ||
+    snack.id.toLowerCase().includes(searchLower) ||
+    snack.category.toLowerCase().includes(searchLower)
+  );
+  
+  const grouped: Record<string, Snack[]> = {};
+  results.forEach(snack => {
+    if (!grouped[snack.category]) {
+      grouped[snack.category] = [];
+    }
+    grouped[snack.category].push(snack);
+  });
+  
+  return grouped;
+}
+
+export function getAllCategories(): string[] {
+  return [...new Set(snacks.map(s => s.category))];
+}
