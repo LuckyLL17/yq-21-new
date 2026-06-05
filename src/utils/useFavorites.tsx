@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import type { Snack } from '../data/snacks';
 
 export interface FavoriteItem {
@@ -30,7 +30,27 @@ const defaultCategories: FavoriteCategory[] = [
   }
 ];
 
-export function useFavorites() {
+interface FavoritesContextType {
+  favorites: FavoriteItem[];
+  categories: FavoriteCategory[];
+  sortField: SortField;
+  sortOrder: SortOrder;
+  setSortField: (field: SortField) => void;
+  setSortOrder: (order: SortOrder) => void;
+  isFavorite: (snackId: string) => boolean;
+  addFavorite: (snack: Snack, categoryIds?: string[]) => void;
+  removeFavorite: (snackId: string) => void;
+  toggleFavorite: (snack: Snack) => void;
+  addCategory: (name: string, color: string) => FavoriteCategory;
+  removeCategory: (categoryId: string) => void;
+  updateCategory: (categoryId: string, name: string, color: string) => void;
+  setSnackCategories: (snackId: string, categoryIds: string[]) => void;
+  getFavoritesByCategory: (categoryId: string) => FavoriteItem[];
+}
+
+const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
+
+export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [categories, setCategories] = useState<FavoriteCategory[]>(defaultCategories);
   const [sortField, setSortField] = useState<SortField>('favoritedAt');
@@ -90,12 +110,18 @@ export function useFavorites() {
   }, []);
 
   const toggleFavorite = useCallback((snack: Snack) => {
-    if (isFavorite(snack.id)) {
-      removeFavorite(snack.id);
-    } else {
-      addFavorite(snack);
-    }
-  }, [isFavorite, addFavorite, removeFavorite]);
+    setFavorites(prev => {
+      if (prev.some(f => f.snackId === snack.id)) {
+        return prev.filter(f => f.snackId !== snack.id);
+      }
+      return [...prev, {
+        snackId: snack.id,
+        snack,
+        favoritedAt: Date.now(),
+        categoryIds: []
+      }];
+    });
+  }, []);
 
   const addCategory = useCallback((name: string, color: string) => {
     const newCategory: FavoriteCategory = {
@@ -154,21 +180,35 @@ export function useFavorites() {
     });
   }, [favorites, sortField, sortOrder]);
 
-  return {
-    favorites,
-    categories,
-    sortField,
-    sortOrder,
-    setSortField,
-    setSortOrder,
-    isFavorite,
-    addFavorite,
-    removeFavorite,
-    toggleFavorite,
-    addCategory,
-    removeCategory,
-    updateCategory,
-    setSnackCategories,
-    getFavoritesByCategory
-  };
+  return (
+    <FavoritesContext.Provider
+      value={{
+        favorites,
+        categories,
+        sortField,
+        sortOrder,
+        setSortField,
+        setSortOrder,
+        isFavorite,
+        addFavorite,
+        removeFavorite,
+        toggleFavorite,
+        addCategory,
+        removeCategory,
+        updateCategory,
+        setSnackCategories,
+        getFavoritesByCategory
+      }}
+    >
+      {children}
+    </FavoritesContext.Provider>
+  );
+}
+
+export function useFavorites() {
+  const context = useContext(FavoritesContext);
+  if (context === undefined) {
+    throw new Error('useFavorites must be used within a FavoritesProvider');
+  }
+  return context;
 }

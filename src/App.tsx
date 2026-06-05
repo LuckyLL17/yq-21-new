@@ -5,22 +5,25 @@ import { SnackDetail } from './pages/SnackDetail';
 import { Records } from './pages/Records';
 import { Favorites } from './pages/Favorites';
 import { ThemeProvider } from './utils/ThemeContext';
+import { FavoritesProvider } from './utils/useFavorites';
 import './index.css';
 
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50">
-          <Header />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/snack/:id" element={<SnackDetail />} />
-            <Route path="/records" element={<Records />} />
-            <Route path="/favorites" element={<Favorites />} />
-          </Routes>
-        </div>
-      </Router>
+      <FavoritesProvider>
+        <Router>
+          <div className="min-h-screen bg-gray-50">
+            <Header />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/snack/:id" element={<SnackDetail />} />
+              <Route path="/records" element={<Records />} />
+              <Route path="/favorites" element={<Favorites />} />
+            </Routes>
+          </div>
+        </Router>
+      </FavoritesProvider>
     </ThemeProvider>
   );
 }
