@@ -1,10 +1,20 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Flame, Zap, Heart, ArrowRight, Info } from 'lucide-react';
 import { SearchBar } from '../components/SearchBar';
 import { SnackCard } from '../components/SnackCard';
-import { getPopularSnacks } from '../data/snacks';
+import { getPopularSnacks, findSnackByName } from '../data/snacks';
 
 export function Home() {
+  const navigate = useNavigate();
   const popularSnacks = getPopularSnacks(8);
+
+  const handleQuickSearch = (keyword: string) => {
+    const results = findSnackByName(keyword);
+    if (results.length > 0) {
+      navigate(`/snack/${results[0].id}`);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -39,12 +49,13 @@ export function Home() {
           <div className="flex flex-wrap items-center justify-center gap-4 mt-8 text-sm text-gray-500">
             <span>试试：</span>
             {['薯片', '巧克力', '冰淇淋', '珍珠奶茶'].map((item) => (
-              <span
+              <button
                 key={item}
-                className="px-3 py-1 bg-white/70 rounded-full cursor-pointer hover:bg-white transition-colors"
+                onClick={() => handleQuickSearch(item)}
+                className="px-3 py-1 bg-white/70 rounded-full cursor-pointer hover:bg-white transition-colors hover:text-primary-600"
               >
                 {item}
-              </span>
+              </button>
             ))}
           </div>
         </div>

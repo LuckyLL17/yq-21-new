@@ -290,10 +290,19 @@ export function getSnackById(id: string): Snack | undefined {
 }
 
 export function getAlternatives(snack: Snack, count: number = 3): Snack[] {
-  return snacks
-    .filter(s => s.id !== snack.id && s.calories < snack.calories)
-    .sort((a, b) => Math.abs(a.calories - snack.calories / 2) - Math.abs(b.calories - snack.calories / 2))
-    .slice(0, count);
+  const sameCategoryAlternatives = snacks
+    .filter(s => s.id !== snack.id && s.category === snack.category && s.calories < snack.calories)
+    .sort((a, b) => Math.abs(a.calories - snack.calories / 2) - Math.abs(b.calories - snack.calories / 2));
+  
+  if (sameCategoryAlternatives.length >= count) {
+    return sameCategoryAlternatives.slice(0, count);
+  }
+  
+  const otherAlternatives = snacks
+    .filter(s => s.id !== snack.id && s.category !== snack.category && s.calories < snack.calories)
+    .sort((a, b) => Math.abs(a.calories - snack.calories / 2) - Math.abs(b.calories - snack.calories / 2));
+  
+  return [...sameCategoryAlternatives, ...otherAlternatives].slice(0, count);
 }
 
 export function getPopularSnacks(count: number = 8): Snack[] {
