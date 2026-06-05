@@ -1,10 +1,12 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Flame, ArrowLeft } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Flame, ArrowLeft, History } from 'lucide-react';
 import { SearchBar } from './SearchBar';
 
 export function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isHome = location.pathname === '/';
+  const isRecords = location.pathname === '/records';
 
   return (
     <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-100">
@@ -12,7 +14,10 @@ export function Header() {
         <div className="h-16 flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2 group">
             {!isHome && (
-              <button className="mr-2 p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors">
+              <button
+                onClick={() => navigate(-1)}
+                className="mr-2 p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors"
+              >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
             )}
@@ -24,13 +29,42 @@ export function Header() {
             </span>
           </Link>
 
-          {!isHome && (
+          <nav className="hidden md:flex items-center gap-1">
+            <Link
+              to="/"
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                isHome
+                  ? 'bg-primary-50 text-primary-600'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              首页
+            </Link>
+            <Link
+              to="/records"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                isRecords
+                  ? 'bg-primary-50 text-primary-600'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <History className="w-4 h-4" />
+              热量记录
+            </Link>
+          </nav>
+
+          {!isHome && !isRecords && (
             <div className="flex-1 max-w-md">
               <SearchBar variant="normal" />
             </div>
           )}
 
-          <div className="w-9" />
+          <Link
+            to="/records"
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <History className="w-5 h-5 text-gray-600" />
+          </Link>
         </div>
       </div>
     </header>
