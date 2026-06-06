@@ -1,40 +1,51 @@
-import { useState } from 'react';
-import { Target, Clock, Flame, Dumbbell, ChevronDown, ChevronUp, Zap, Leaf, Sparkles, Info } from 'lucide-react';
-import { generateExercisePlans, type ExercisePlan } from '../utils/exercisePlan';
-import { formatTime } from '../utils/exercise';
-import { getWeightOptions } from '../utils/constants';
-import { formatEnergy, type EnergyUnit, getEnergyRangeDescription } from '../utils/energy';
-import { ERROR_MARGIN_DESCRIPTION } from '../utils/constants';
-import { getIntensityLabel } from '../data/exercises';
+import { useState } from 'react'
+import {
+  Target,
+  Clock,
+  Flame,
+  Dumbbell,
+  ChevronDown,
+  ChevronUp,
+  Zap,
+  Leaf,
+  Sparkles,
+  Info,
+} from 'lucide-react'
+import { generateExercisePlans, type ExercisePlan } from '../utils/exercisePlan'
+import { formatTime } from '../utils/exercise'
+import { getWeightOptions } from '../utils/constants'
+import { formatEnergy, type EnergyUnit, getEnergyRangeDescription } from '../utils/energy'
+import { ERROR_MARGIN_DESCRIPTION } from '../utils/constants'
+import { getIntensityLabel } from '../data/exercises'
 
 const difficultyConfig = {
   easy: { label: '简单', color: 'bg-green-100 text-green-700', icon: Leaf },
   medium: { label: '中等', color: 'bg-yellow-100 text-yellow-700', icon: Zap },
-  hard: { label: '困难', color: 'bg-red-100 text-red-700', icon: Flame }
-};
+  hard: { label: '困难', color: 'bg-red-100 text-red-700', icon: Flame },
+}
 
 const planIcons: Record<string, typeof Dumbbell> = {
   'quick-fat-burn': Flame,
-  'balanced': Dumbbell,
-  'easy': Leaf,
-  'variety': Sparkles
-};
+  balanced: Dumbbell,
+  easy: Leaf,
+  variety: Sparkles,
+}
 
 export function ExercisePlan() {
-  const [targetCalories, setTargetCalories] = useState<number>(300);
-  const [weight, setWeight] = useState<number>(65);
-  const [energyUnit, setEnergyUnit] = useState<EnergyUnit>('kcal');
-  const [plans, setPlans] = useState<ExercisePlan[]>([]);
-  const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
-  const [hasGenerated, setHasGenerated] = useState(false);
+  const [targetCalories, setTargetCalories] = useState<number>(300)
+  const [weight, setWeight] = useState<number>(65)
+  const [energyUnit, setEnergyUnit] = useState<EnergyUnit>('kcal')
+  const [plans, setPlans] = useState<ExercisePlan[]>([])
+  const [expandedPlan, setExpandedPlan] = useState<string | null>(null)
+  const [hasGenerated, setHasGenerated] = useState(false)
 
   const handleGenerate = () => {
-    const generatedPlans = generateExercisePlans(targetCalories, weight);
-    setPlans(generatedPlans);
-    setHasGenerated(true);
-  };
+    const generatedPlans = generateExercisePlans(targetCalories, weight)
+    setPlans(generatedPlans)
+    setHasGenerated(true)
+  }
 
-  const calorieOptions = [100, 200, 300, 400, 500, 600, 800, 1000];
+  const calorieOptions = [100, 200, 300, 400, 500, 600, 800, 1000]
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -43,20 +54,21 @@ export function ExercisePlan() {
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-200/50 rounded-full blur-3xl" />
           <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-accent-200/50 rounded-full blur-3xl" />
         </div>
-        
+
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-sm text-primary-700 font-medium mb-6">
             <Target className="w-4 h-4" />
             <span>智能运动方案</span>
           </div>
-          
+
           <h1 className="font-poppins text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 leading-tight mb-4">
             根据目标热量
             <span className="bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
-              {' '}生成运动方案{' '}
+              {' '}
+              生成运动方案{' '}
             </span>
           </h1>
-          
+
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             输入你想要消耗的热量，为你生成个性化的运动组合方案
           </p>
@@ -66,15 +78,11 @@ export function ExercisePlan() {
       <section className="py-8 md:py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="bg-white rounded-3xl p-6 md:p-8 card-shadow mb-8">
-            <h2 className="font-poppins text-xl font-semibold text-gray-800 mb-6">
-              设置你的目标
-            </h2>
-            
+            <h2 className="font-poppins text-xl font-semibold text-gray-800 mb-6">设置你的目标</h2>
+
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  目标消耗热量
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-3">目标消耗热量</label>
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-1">
                     <button
@@ -118,17 +126,17 @@ export function ExercisePlan() {
                   type="number"
                   value={energyUnit === 'kJ' ? Math.round(targetCalories * 4.184) : targetCalories}
                   onChange={(e) => {
-                    const val = Number(e.target.value) || 0;
+                    const val = Number(e.target.value) || 0
                     setTargetCalories(
-                      Math.max(50, energyUnit === 'kJ' ? Math.round(val / 4.184) : val)
-                    );
+                      Math.max(50, energyUnit === 'kJ' ? Math.round(val / 4.184) : val),
+                    )
                   }}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                   placeholder="或输入自定义热量"
                   min="50"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   你的体重（公斤）
@@ -144,12 +152,10 @@ export function ExercisePlan() {
                     </option>
                   ))}
                 </select>
-                <p className="mt-2 text-sm text-gray-500">
-                  用于更精确地计算运动消耗
-                </p>
+                <p className="mt-2 text-sm text-gray-500">用于更精确地计算运动消耗</p>
               </div>
             </div>
-            
+
             <button
               onClick={handleGenerate}
               className="w-full py-4 bg-gradient-to-r from-primary-500 to-accent-500 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-accent-600 transition-all shadow-lg hover:shadow-xl"
@@ -165,18 +171,16 @@ export function ExercisePlan() {
                   <Dumbbell className="w-5 h-5 text-primary-600" />
                 </div>
                 <div>
-                  <h2 className="font-poppins text-2xl font-bold text-gray-800">
-                    推荐方案
-                  </h2>
+                  <h2 className="font-poppins text-2xl font-bold text-gray-800">推荐方案</h2>
                   <p className="text-gray-500">共 {plans.length} 种运动方案可选</p>
                 </div>
               </div>
-              
+
               {plans.map((plan) => {
-                const Icon = planIcons[plan.id] || Dumbbell;
-                const DifficultyIcon = difficultyConfig[plan.difficulty].icon;
-                const isExpanded = expandedPlan === plan.id;
-                
+                const Icon = planIcons[plan.id] || Dumbbell
+                const DifficultyIcon = difficultyConfig[plan.difficulty].icon
+                const isExpanded = expandedPlan === plan.id
+
                 return (
                   <div
                     key={plan.id}
@@ -195,11 +199,11 @@ export function ExercisePlan() {
                             <h3 className="font-poppins text-lg font-semibold text-gray-800 mb-1">
                               {plan.name}
                             </h3>
-                            <p className="text-gray-500 text-sm mb-3">
-                              {plan.description}
-                            </p>
+                            <p className="text-gray-500 text-sm mb-3">{plan.description}</p>
                             <div className="flex flex-wrap items-center gap-3">
-                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${difficultyConfig[plan.difficulty].color}`}>
+                              <span
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${difficultyConfig[plan.difficulty].color}`}
+                              >
                                 <DifficultyIcon className="w-3.5 h-3.5" />
                                 {difficultyConfig[plan.difficulty].label}
                               </span>
@@ -208,8 +212,8 @@ export function ExercisePlan() {
                                 {formatTime(plan.totalMinutes)}
                               </span>
                               <span className="inline-flex items-center gap-1.5 text-sm text-gray-600">
-                                <Flame className="w-4 h-4" />
-                                约 {formatEnergy(plan.totalCalories, energyUnit)}
+                                <Flame className="w-4 h-4" />约{' '}
+                                {formatEnergy(plan.totalCalories, energyUnit)}
                               </span>
                             </div>
                           </div>
@@ -223,13 +227,13 @@ export function ExercisePlan() {
                         </button>
                       </div>
                     </div>
-                    
+
                     {isExpanded && (
                       <div className="px-6 pb-6 border-t border-gray-100">
                         <h4 className="text-sm font-semibold text-gray-700 py-4">详细安排</h4>
                         <div className="space-y-3">
                           {plan.items.map((item, index) => {
-                            const ExerciseIcon = item.exercise.icon;
+                            const ExerciseIcon = item.exercise.icon
                             return (
                               <div
                                 key={index}
@@ -244,7 +248,8 @@ export function ExercisePlan() {
                                       {item.exercise.name}
                                     </p>
                                     <p className="text-sm text-gray-500">
-                                      {item.minutes} {item.exercise.unit} · {getIntensityLabel(item.intensity)}
+                                      {item.minutes} {item.exercise.unit} ·{' '}
+                                      {getIntensityLabel(item.intensity)}
                                     </p>
                                   </div>
                                 </div>
@@ -257,10 +262,10 @@ export function ExercisePlan() {
                                   </p>
                                 </div>
                               </div>
-                            );
+                            )
                           })}
                         </div>
-                        
+
                         <div className="mt-4 p-4 bg-gradient-to-r from-primary-50 to-accent-50 rounded-xl">
                           <div className="flex items-center justify-between">
                             <span className="font-medium text-gray-700">总计</span>
@@ -272,7 +277,8 @@ export function ExercisePlan() {
                                 消耗 {formatEnergy(plan.totalCalories, energyUnit)}
                               </p>
                               <p className="text-xs text-gray-500 mt-1">
-                                误差范围：{getEnergyRangeDescription(plan.totalCalories, energyUnit)}
+                                误差范围：
+                                {getEnergyRangeDescription(plan.totalCalories, energyUnit)}
                               </p>
                             </div>
                           </div>
@@ -280,7 +286,7 @@ export function ExercisePlan() {
                       </div>
                     )}
                   </div>
-                );
+                )
               })}
             </div>
           )}
@@ -309,11 +315,9 @@ export function ExercisePlan() {
 
       <footer className="py-8 bg-gray-50 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-          <p className="text-gray-500 text-sm">
-            © 2024 零食热量计算器 · 让健康饮食更简单
-          </p>
+          <p className="text-gray-500 text-sm">© 2024 零食热量计算器 · 让健康饮食更简单</p>
         </div>
       </footer>
     </div>
-  );
+  )
 }

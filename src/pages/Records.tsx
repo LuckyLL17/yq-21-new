@@ -1,28 +1,26 @@
-import { useState } from 'react';
-import { Calendar, LayoutGrid, Flame, History, X, Dumbbell, UtensilsCrossed } from 'lucide-react';
-import { RecordForm } from '../components/RecordForm';
-import { ExerciseRecordForm } from '../components/ExerciseRecordForm';
-import { DailyReport } from '../components/DailyReport';
-import { CalendarHeatmap } from '../components/CalendarHeatmap';
-import { RecordList } from '../components/RecordList';
-import type { EnergyUnit } from '../utils/energy';
+import { useState } from 'react'
+import { Calendar, LayoutGrid, Flame, History, X, Dumbbell, UtensilsCrossed } from 'lucide-react'
+import { RecordForm } from '../components/RecordForm'
+import { ExerciseRecordForm } from '../components/ExerciseRecordForm'
+import { DailyReport } from '../components/DailyReport'
+import { CalendarHeatmap } from '../components/CalendarHeatmap'
+import { RecordList } from '../components/RecordList'
+import type { EnergyUnit } from '../utils/energy'
 
-type ViewMode = 'split' | 'calendar';
-type RecordType = 'food' | 'exercise';
+type ViewMode = 'split' | 'calendar'
+type RecordType = 'food' | 'exercise'
 
 export function Records() {
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split('T')[0]
-  );
-  const [viewMode, setViewMode] = useState<ViewMode>('split');
-  const [recordType, setRecordType] = useState<RecordType>('food');
-  const [energyUnit, setEnergyUnit] = useState<EnergyUnit>('kcal');
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [showRecordList, setShowRecordList] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [viewMode, setViewMode] = useState<ViewMode>('split')
+  const [recordType, setRecordType] = useState<RecordType>('food')
+  const [energyUnit, setEnergyUnit] = useState<EnergyUnit>('kcal')
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [showRecordList, setShowRecordList] = useState(false)
 
   const handleRecordAdded = () => {
-    setRefreshTrigger((prev) => prev + 1);
-  };
+    setRefreshTrigger((prev) => prev + 1)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -34,9 +32,7 @@ export function Records() {
                 <Flame className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="font-poppins text-3xl font-bold text-gray-800">
-                  热量记录
-                </h1>
+                <h1 className="font-poppins text-3xl font-bold text-gray-800">热量记录</h1>
                 <p className="text-gray-500">记录你的热量摄入与消耗，追踪健康饮食</p>
               </div>
             </div>
@@ -72,7 +68,7 @@ export function Records() {
               </button>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2 mb-6">
             <button
               onClick={() => setRecordType('food')}
@@ -208,5 +204,5 @@ export function Records() {
         </div>
       )}
     </div>
-  );
+  )
 }

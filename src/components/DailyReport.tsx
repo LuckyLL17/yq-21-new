@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
 import {
   Flame,
   Target,
@@ -10,80 +10,82 @@ import {
   Zap,
   Dumbbell,
   Scale,
-} from 'lucide-react';
-import type { DailySummary } from '../data/records';
-import { getDailySummary } from '../data/records';
-import { getCaloriesLevel } from '../utils/snack';
-import { formatEnergy, type EnergyUnit } from '../utils/energy';
+} from 'lucide-react'
+import type { DailySummary } from '../data/records'
+import { getDailySummary } from '../data/records'
+import { getCaloriesLevel } from '../utils/snack'
+import { formatEnergy, type EnergyUnit } from '../utils/energy'
 
 interface DailyReportProps {
-  date?: string;
-  onDateChange?: (date: string) => void;
-  refreshTrigger?: number;
-  energyUnit?: EnergyUnit;
+  date?: string
+  onDateChange?: (date: string) => void
+  refreshTrigger?: number
+  energyUnit?: EnergyUnit
 }
 
-const DAILY_CALORIE_GOAL = 2000;
+const DAILY_CALORIE_GOAL = 2000
 
-export function DailyReport({ date: propDate, onDateChange, refreshTrigger, energyUnit = 'kcal' }: DailyReportProps) {
-  const currentDate = propDate || new Date().toISOString().split('T')[0];
-  const [summary, setSummary] = useState<DailySummary | null>(null);
+export function DailyReport({
+  date: propDate,
+  onDateChange,
+  refreshTrigger,
+  energyUnit = 'kcal',
+}: DailyReportProps) {
+  const currentDate = propDate || new Date().toISOString().split('T')[0]
+  const [summary, setSummary] = useState<DailySummary | null>(null)
 
   useEffect(() => {
-    const dailySummary = getDailySummary(currentDate);
-    setSummary(dailySummary);
-  }, [currentDate, refreshTrigger]);
+    const dailySummary = getDailySummary(currentDate)
+    setSummary(dailySummary)
+  }, [currentDate, refreshTrigger])
 
   const changeDate = (days: number) => {
-    const date = new Date(currentDate);
-    date.setDate(date.getDate() + days);
-    const newDate = date.toISOString().split('T')[0];
-    onDateChange?.(newDate);
-  };
+    const date = new Date(currentDate)
+    date.setDate(date.getDate() + days)
+    const newDate = date.toISOString().split('T')[0]
+    onDateChange?.(newDate)
+  }
 
   const goToToday = () => {
-    const today = new Date().toISOString().split('T')[0];
-    onDateChange?.(today);
-  };
+    const today = new Date().toISOString().split('T')[0]
+    onDateChange?.(today)
+  }
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+    const date = new Date(dateStr)
+    const today = new Date()
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
 
     if (dateStr === today.toISOString().split('T')[0]) {
-      return '今天';
+      return '今天'
     } else if (dateStr === yesterday.toISOString().split('T')[0]) {
-      return '昨天';
+      return '昨天'
     } else {
-      return `${date.getMonth() + 1}月${date.getDate()}日`;
+      return `${date.getMonth() + 1}月${date.getDate()}日`
     }
-  };
+  }
 
   const getWeekday = (dateStr: string) => {
-    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-    return weekdays[new Date(dateStr).getDay()];
-  };
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+    return weekdays[new Date(dateStr).getDay()]
+  }
 
-  if (!summary) return null;
+  if (!summary) return null
 
-  const progress = Math.min(
-    (summary.totalCalories / DAILY_CALORIE_GOAL) * 100,
-    100
-  );
-  const remaining = DAILY_CALORIE_GOAL - summary.totalCalories;
-  const caloriesLevel = getCaloriesLevel(summary.totalCalories);
+  const progress = Math.min((summary.totalCalories / DAILY_CALORIE_GOAL) * 100, 100)
+  const remaining = DAILY_CALORIE_GOAL - summary.totalCalories
+  const caloriesLevel = getCaloriesLevel(summary.totalCalories)
 
-  const proteinCalories = summary.totalProtein * 4;
-  const fatCalories = summary.totalFat * 9;
-  const carbsCalories = summary.totalCarbs * 4;
-  const totalMacroCalories = proteinCalories + fatCalories + carbsCalories;
+  const proteinCalories = summary.totalProtein * 4
+  const fatCalories = summary.totalFat * 9
+  const carbsCalories = summary.totalCarbs * 4
+  const totalMacroCalories = proteinCalories + fatCalories + carbsCalories
 
   const getMacroPercentage = (macroCalories: number) => {
-    if (totalMacroCalories === 0) return 0;
-    return (macroCalories / totalMacroCalories) * 100;
-  };
+    if (totalMacroCalories === 0) return 0
+    return (macroCalories / totalMacroCalories) * 100
+  }
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -96,12 +98,8 @@ export function DailyReport({ date: propDate, onDateChange, refreshTrigger, ener
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
           <div className="text-center">
-            <div className="font-semibold text-gray-800">
-              {formatDate(currentDate)}
-            </div>
-            <div className="text-sm text-gray-500">
-              {getWeekday(currentDate)}
-            </div>
+            <div className="font-semibold text-gray-800">{formatDate(currentDate)}</div>
+            <div className="text-sm text-gray-500">{getWeekday(currentDate)}</div>
           </div>
           <button
             onClick={() => changeDate(1)}
@@ -142,18 +140,14 @@ export function DailyReport({ date: propDate, onDateChange, refreshTrigger, ener
         <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden">
           <div
             className={`absolute left-0 top-0 h-full rounded-full transition-all duration-500 ${
-              progress > 100
-                ? 'bg-red-500'
-                : 'bg-gradient-to-r from-primary-500 to-accent-500'
+              progress > 100 ? 'bg-red-500' : 'bg-gradient-to-r from-primary-500 to-accent-500'
             }`}
             style={{ width: `${progress}%` }}
           />
         </div>
 
         <div className="flex items-center justify-between mt-2">
-          <span className={`text-sm ${caloriesLevel.color}`}>
-            {caloriesLevel.message}
-          </span>
+          <span className={`text-sm ${caloriesLevel.color}`}>{caloriesLevel.message}</span>
           <span className="text-sm text-gray-500">
             {remaining > 0
               ? `还可摄入 ${formatEnergy(remaining, energyUnit)}`
@@ -178,9 +172,7 @@ export function DailyReport({ date: propDate, onDateChange, refreshTrigger, ener
             </div>
             <div className="text-right">
               <div className="text-sm text-gray-500">运动次数</div>
-              <div className="text-lg font-semibold text-gray-700">
-                {summary.exerciseCount} 次
-              </div>
+              <div className="text-lg font-semibold text-gray-700">{summary.exerciseCount} 次</div>
             </div>
           </div>
         </div>
@@ -195,17 +187,17 @@ export function DailyReport({ date: propDate, onDateChange, refreshTrigger, ener
               </div>
               <div>
                 <div className="text-sm text-gray-500">净热量</div>
-                <div className={`text-xl font-bold ${
-                  summary.netCalories > 0 ? 'text-orange-500' : 'text-green-600'
-                }`}>
+                <div
+                  className={`text-xl font-bold ${
+                    summary.netCalories > 0 ? 'text-orange-500' : 'text-green-600'
+                  }`}
+                >
                   {summary.netCalories > 0 ? '+' : ''}
                   {formatEnergy(summary.netCalories, energyUnit)}
                 </div>
               </div>
             </div>
-            <div className="text-right text-xs text-gray-500">
-              摄入 - 消耗
-            </div>
+            <div className="text-right text-xs text-gray-500">摄入 - 消耗</div>
           </div>
         </div>
       )}
@@ -215,36 +207,28 @@ export function DailyReport({ date: propDate, onDateChange, refreshTrigger, ener
           <div className="w-8 h-8 mx-auto mb-2 rounded-lg bg-blue-500 flex items-center justify-center">
             <Activity className="w-4 h-4 text-white" />
           </div>
-          <div className="text-xl font-bold text-blue-600">
-            {summary.totalProtein.toFixed(1)}g
-          </div>
+          <div className="text-xl font-bold text-blue-600">{summary.totalProtein.toFixed(1)}g</div>
           <div className="text-xs text-gray-500">蛋白质</div>
         </div>
         <div className="p-4 bg-yellow-50 rounded-xl text-center">
           <div className="w-8 h-8 mx-auto mb-2 rounded-lg bg-yellow-500 flex items-center justify-center">
             <Droplets className="w-4 h-4 text-white" />
           </div>
-          <div className="text-xl font-bold text-yellow-600">
-            {summary.totalFat.toFixed(1)}g
-          </div>
+          <div className="text-xl font-bold text-yellow-600">{summary.totalFat.toFixed(1)}g</div>
           <div className="text-xs text-gray-500">脂肪</div>
         </div>
         <div className="p-4 bg-green-50 rounded-xl text-center">
           <div className="w-8 h-8 mx-auto mb-2 rounded-lg bg-green-500 flex items-center justify-center">
             <Zap className="w-4 h-4 text-white" />
           </div>
-          <div className="text-xl font-bold text-green-600">
-            {summary.totalCarbs.toFixed(1)}g
-          </div>
+          <div className="text-xl font-bold text-green-600">{summary.totalCarbs.toFixed(1)}g</div>
           <div className="text-xs text-gray-500">碳水化合物</div>
         </div>
       </div>
 
       {totalMacroCalories > 0 && (
         <div className="mb-6">
-          <div className="text-sm font-medium text-gray-600 mb-3">
-            营养素分布
-          </div>
+          <div className="text-sm font-medium text-gray-600 mb-3">营养素分布</div>
           <div className="h-4 rounded-full overflow-hidden flex">
             <div
               className="bg-blue-500 transition-all duration-300"
@@ -296,13 +280,11 @@ export function DailyReport({ date: propDate, onDateChange, refreshTrigger, ener
             <span className="text-sm text-gray-600">平均每次</span>
           </div>
           <div className="text-2xl font-bold text-gray-800">
-            {summary.recordCount > 0
-              ? Math.round(summary.totalCalories / summary.recordCount)
-              : 0}
+            {summary.recordCount > 0 ? Math.round(summary.totalCalories / summary.recordCount) : 0}
             <span className="text-sm font-normal text-gray-500 ml-1">kcal</span>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }

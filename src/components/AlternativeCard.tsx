@@ -1,39 +1,40 @@
-import { useNavigate } from 'react-router-dom';
-import { Flame, ArrowRight, TrendingDown, Sparkles, CheckCircle2 } from 'lucide-react';
-import type { AlternativeRecommendation } from '../data/snacks';
+import { useNavigate } from 'react-router-dom'
+import { Flame, ArrowRight, TrendingDown, Sparkles, CheckCircle2 } from 'lucide-react'
+import type { AlternativeRecommendation } from '../data/snacks'
 
 interface AlternativeCardProps {
-  recommendation: AlternativeRecommendation;
+  recommendation: AlternativeRecommendation
 }
 
 export function AlternativeCard({ recommendation }: AlternativeCardProps) {
-  const navigate = useNavigate();
-  const { snack, tasteSimilarity, reasons, isSameCategory, caloriesSaved, caloriesSavedPercent } = recommendation;
+  const navigate = useNavigate()
+  const { snack, tasteSimilarity, reasons, isSameCategory, caloriesSaved, caloriesSavedPercent } =
+    recommendation
 
   const categoryEmojis: Record<string, string> = {
-    '膨化食品': '🍿',
-    '巧克力': '🍫',
-    '饼干': '🍪',
-    '冰淇淋': '🍦',
-    '糖果': '🍬',
-    '坚果': '🥜',
-    '油炸食品': '🍟',
-    '糕点': '🍩',
-    '果干': '🥭',
-    '乳制品': '🥛',
-    '饮料': '🧋',
-    '方便食品': '🍜',
-  };
+    膨化食品: '🍿',
+    巧克力: '🍫',
+    饼干: '🍪',
+    冰淇淋: '🍦',
+    糖果: '🍬',
+    坚果: '🥜',
+    油炸食品: '🍟',
+    糕点: '🍩',
+    果干: '🥭',
+    乳制品: '🥛',
+    饮料: '🧋',
+    方便食品: '🍜',
+  }
 
-  const emoji = categoryEmojis[snack.category] || '🍴';
+  const emoji = categoryEmojis[snack.category] || '🍴'
 
   const tasteSimilarityConfig = {
-    '高': { color: 'text-emerald-600', bgColor: 'bg-emerald-100', borderColor: 'border-emerald-200' },
-    '中': { color: 'text-amber-600', bgColor: 'bg-amber-100', borderColor: 'border-amber-200' },
-    '低': { color: 'text-gray-600', bgColor: 'bg-gray-100', borderColor: 'border-gray-200' },
-  };
+    高: { color: 'text-emerald-600', bgColor: 'bg-emerald-100', borderColor: 'border-emerald-200' },
+    中: { color: 'text-amber-600', bgColor: 'bg-amber-100', borderColor: 'border-amber-200' },
+    低: { color: 'text-gray-600', bgColor: 'bg-gray-100', borderColor: 'border-gray-200' },
+  }
 
-  const similarityStyle = tasteSimilarityConfig[tasteSimilarity];
+  const similarityStyle = tasteSimilarityConfig[tasteSimilarity]
 
   return (
     <button
@@ -50,7 +51,7 @@ export function AlternativeCard({ recommendation }: AlternativeCardProps) {
             <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all flex-shrink-0" />
           </div>
           <p className="text-sm text-gray-500 mt-0.5">{snack.servingSize}</p>
-          
+
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <div className="flex items-center gap-1.5">
               <Flame className="w-4 h-4 text-orange-500" />
@@ -60,9 +61,13 @@ export function AlternativeCard({ recommendation }: AlternativeCardProps) {
               <TrendingDown className="w-3 h-3 text-green-600" />
               <span className="text-xs font-medium text-green-600">少 {caloriesSavedPercent}%</span>
             </div>
-            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full ${similarityStyle.bgColor} ${similarityStyle.borderColor} border`}>
+            <div
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-full ${similarityStyle.bgColor} ${similarityStyle.borderColor} border`}
+            >
               <Sparkles className="w-3 h-3" style={{ color: 'inherit' }} />
-              <span className={`text-xs font-medium ${similarityStyle.color}`}>口味相似度 {tasteSimilarity}</span>
+              <span className={`text-xs font-medium ${similarityStyle.color}`}>
+                口味相似度 {tasteSimilarity}
+              </span>
             </div>
             {isSameCategory && (
               <div className="flex items-center gap-1 px-2 py-0.5 bg-primary-100 rounded-full">
@@ -71,7 +76,7 @@ export function AlternativeCard({ recommendation }: AlternativeCardProps) {
               </div>
             )}
           </div>
-          
+
           <div className="mt-3 pt-3 border-t border-gray-100">
             <p className="text-xs font-medium text-gray-700 mb-1.5">推荐理由</p>
             <ul className="space-y-1">
@@ -83,12 +88,12 @@ export function AlternativeCard({ recommendation }: AlternativeCardProps) {
               ))}
             </ul>
           </div>
-          
+
           <p className="text-xs text-green-600 mt-2 font-medium">
             可减少约 {caloriesSaved} 千卡摄入
           </p>
         </div>
       </div>
     </button>
-  );
+  )
 }

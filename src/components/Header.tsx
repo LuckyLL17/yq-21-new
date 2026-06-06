@@ -1,21 +1,30 @@
-import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Flame, ArrowLeft, History, Palette, Check, Heart, Dumbbell, HeartPulse } from 'lucide-react';
-import { SearchBar } from './SearchBar';
-import { useTheme, themes } from '../utils/ThemeContext';
-import { useFavorites } from '../utils/useFavorites';
+import { useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import {
+  Flame,
+  ArrowLeft,
+  History,
+  Palette,
+  Check,
+  Heart,
+  Dumbbell,
+  HeartPulse,
+} from 'lucide-react'
+import { SearchBar } from './SearchBar'
+import { useTheme, themes } from '../utils/ThemeContext'
+import { useFavorites } from '../utils/useFavorites'
 
 export function Header() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const isHome = location.pathname === '/';
-  const isRecords = location.pathname === '/records';
-  const isFavorites = location.pathname === '/favorites';
-  const isExercisePlan = location.pathname === '/exercise-plan';
-  const isHealth = location.pathname === '/health';
-  const { currentTheme, setTheme } = useTheme();
-  const { favorites } = useFavorites();
-  const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const location = useLocation()
+  const navigate = useNavigate()
+  const isHome = location.pathname === '/'
+  const isRecords = location.pathname === '/records'
+  const isFavorites = location.pathname === '/favorites'
+  const isExercisePlan = location.pathname === '/exercise-plan'
+  const isHealth = location.pathname === '/health'
+  const { currentTheme, setTheme } = useTheme()
+  const { favorites } = useFavorites()
+  const [showThemeMenu, setShowThemeMenu] = useState(false)
 
   return (
     <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-100">
@@ -42,9 +51,7 @@ export function Header() {
             <Link
               to="/"
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                isHome
-                  ? 'bg-primary-50 text-primary-600'
-                  : 'text-gray-600 hover:bg-gray-100'
+                isHome ? 'bg-primary-50 text-primary-600' : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
               首页
@@ -52,9 +59,7 @@ export function Header() {
             <Link
               to="/health"
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                isHealth
-                  ? 'bg-primary-50 text-primary-600'
-                  : 'text-gray-600 hover:bg-gray-100'
+                isHealth ? 'bg-primary-50 text-primary-600' : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
               <HeartPulse className="w-4 h-4" />
@@ -74,9 +79,7 @@ export function Header() {
             <Link
               to="/favorites"
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                isFavorites
-                  ? 'bg-primary-50 text-primary-600'
-                  : 'text-gray-600 hover:bg-gray-100'
+                isFavorites ? 'bg-primary-50 text-primary-600' : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
               <Heart className="w-4 h-4" />
@@ -90,9 +93,7 @@ export function Header() {
             <Link
               to="/records"
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                isRecords
-                  ? 'bg-primary-50 text-primary-600'
-                  : 'text-gray-600 hover:bg-gray-100'
+                isRecords ? 'bg-primary-50 text-primary-600' : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
               <History className="w-4 h-4" />
@@ -114,20 +115,17 @@ export function Header() {
             >
               <Palette className="w-5 h-5 text-gray-600" />
             </button>
-            
+
             {showThemeMenu && (
               <>
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setShowThemeMenu(false)}
-                />
+                <div className="fixed inset-0 z-40" onClick={() => setShowThemeMenu(false)} />
                 <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                   {Object.entries(themes).map(([key, theme]) => (
                     <button
                       key={key}
                       onClick={() => {
-                        setTheme(key);
-                        setShowThemeMenu(false);
+                        setTheme(key)
+                        setShowThemeMenu(false)
                       }}
                       className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center justify-between transition-colors"
                     >
@@ -138,9 +136,7 @@ export function Header() {
                         />
                         <span className="text-sm text-gray-700">{theme.name}</span>
                       </div>
-                      {currentTheme === key && (
-                        <Check className="w-4 h-4 text-primary-600" />
-                      )}
+                      {currentTheme === key && <Check className="w-4 h-4 text-primary-600" />}
                     </button>
                   ))}
                 </div>
@@ -158,7 +154,9 @@ export function Header() {
             to="/exercise-plan"
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            <Dumbbell className={`w-5 h-5 ${isExercisePlan ? 'text-primary-500' : 'text-gray-600'}`} />
+            <Dumbbell
+              className={`w-5 h-5 ${isExercisePlan ? 'text-primary-500' : 'text-gray-600'}`}
+            />
           </Link>
           <Link
             to="/favorites"
@@ -180,5 +178,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  );
+  )
 }

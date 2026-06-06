@@ -1,39 +1,47 @@
-import { useState } from 'react';
-import { Dumbbell, Plus, Minus, Check, Flame } from 'lucide-react';
-import { getAllExercises, getIntensityLabel, type Exercise, type ExerciseIntensity } from '../data/exercises';
-import { addExerciseRecord } from '../data/records';
-import { calculateCaloriesBurned } from '../utils/exercise';
-import { formatEnergy, type EnergyUnit, getEnergyRangeDescription } from '../utils/energy';
-import { getWeightOptions } from '../utils/constants';
+import { useState } from 'react'
+import { Dumbbell, Plus, Minus, Check, Flame } from 'lucide-react'
+import {
+  getAllExercises,
+  getIntensityLabel,
+  type Exercise,
+  type ExerciseIntensity,
+} from '../data/exercises'
+import { addExerciseRecord } from '../data/records'
+import { calculateCaloriesBurned } from '../utils/exercise'
+import { formatEnergy, type EnergyUnit, getEnergyRangeDescription } from '../utils/energy'
+import { getWeightOptions } from '../utils/constants'
 
 interface ExerciseRecordFormProps {
-  onRecordAdded?: () => void;
-  energyUnit?: EnergyUnit;
+  onRecordAdded?: () => void
+  energyUnit?: EnergyUnit
 }
 
-export function ExerciseRecordForm({ onRecordAdded, energyUnit = 'kcal' }: ExerciseRecordFormProps) {
-  const exercises = getAllExercises().filter(e => e.id !== 'sitting');
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
-  const [intensity, setIntensity] = useState<ExerciseIntensity>('medium');
-  const [minutes, setMinutes] = useState(30);
-  const [weight, setWeight] = useState(65);
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [time, setTime] = useState(new Date().toTimeString().slice(0, 5));
-  const [notes, setNotes] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showExerciseDropdown, setShowExerciseDropdown] = useState(false);
+export function ExerciseRecordForm({
+  onRecordAdded,
+  energyUnit = 'kcal',
+}: ExerciseRecordFormProps) {
+  const exercises = getAllExercises().filter((e) => e.id !== 'sitting')
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null)
+  const [intensity, setIntensity] = useState<ExerciseIntensity>('medium')
+  const [minutes, setMinutes] = useState(30)
+  const [weight, setWeight] = useState(65)
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [time, setTime] = useState(new Date().toTimeString().slice(0, 5))
+  const [notes, setNotes] = useState('')
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [showExerciseDropdown, setShowExerciseDropdown] = useState(false)
 
   const caloriesBurned = selectedExercise
     ? calculateCaloriesBurned(selectedExercise, minutes, intensity, weight)
-    : 0;
+    : 0
 
   const handleSelectExercise = (exercise: Exercise) => {
-    setSelectedExercise(exercise);
-    setShowExerciseDropdown(false);
-  };
+    setSelectedExercise(exercise)
+    setShowExerciseDropdown(false)
+  }
 
   const handleSubmit = () => {
-    if (!selectedExercise) return;
+    if (!selectedExercise) return
 
     addExerciseRecord({
       exerciseId: selectedExercise.id,
@@ -45,18 +53,18 @@ export function ExerciseRecordForm({ onRecordAdded, energyUnit = 'kcal' }: Exerc
       date,
       time,
       notes,
-    });
+    })
 
-    setShowSuccess(true);
+    setShowSuccess(true)
 
     setTimeout(() => {
-      setShowSuccess(false);
-      setSelectedExercise(null);
-      setMinutes(30);
-      setNotes('');
-      onRecordAdded?.();
-    }, 1500);
-  };
+      setShowSuccess(false)
+      setSelectedExercise(null)
+      setMinutes(30)
+      setNotes('')
+      onRecordAdded?.()
+    }, 1500)
+  }
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -74,9 +82,7 @@ export function ExerciseRecordForm({ onRecordAdded, energyUnit = 'kcal' }: Exerc
 
       <div className="space-y-4">
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            选择运动
-          </label>
+          <label className="block text-sm font-medium text-gray-600 mb-2">选择运动</label>
           <div
             className="w-full px-4 py-3 border border-gray-200 rounded-xl cursor-pointer hover:border-primary-300 transition-colors"
             onClick={() => setShowExerciseDropdown(!showExerciseDropdown)}
@@ -95,10 +101,7 @@ export function ExerciseRecordForm({ onRecordAdded, energyUnit = 'kcal' }: Exerc
 
           {showExerciseDropdown && (
             <>
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setShowExerciseDropdown(false)}
-              />
+              <div className="fixed inset-0 z-10" onClick={() => setShowExerciseDropdown(false)} />
               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-64 overflow-y-auto">
                 {exercises.map((exercise) => (
                   <button
@@ -112,7 +115,9 @@ export function ExerciseRecordForm({ onRecordAdded, energyUnit = 'kcal' }: Exerc
                     <div className="flex-1">
                       <div className="font-medium text-gray-800">{exercise.name}</div>
                       <div className="text-xs text-gray-500">
-                        {getIntensityLabel('medium')} · 约 {Math.round(calculateCaloriesBurned(exercise, 30, 'medium', 65))} kcal/30分钟
+                        {getIntensityLabel('medium')} · 约{' '}
+                        {Math.round(calculateCaloriesBurned(exercise, 30, 'medium', 65))}{' '}
+                        kcal/30分钟
                       </div>
                     </div>
                   </button>
@@ -125,9 +130,7 @@ export function ExerciseRecordForm({ onRecordAdded, energyUnit = 'kcal' }: Exerc
         {selectedExercise && (
           <div className="p-4 bg-gray-50 rounded-xl space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                运动强度
-              </label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">运动强度</label>
               <div className="flex gap-2">
                 {(['low', 'medium', 'high'] as ExerciseIntensity[]).map((level) => (
                   <button
@@ -147,9 +150,7 @@ export function ExerciseRecordForm({ onRecordAdded, energyUnit = 'kcal' }: Exerc
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">
-                  日期
-                </label>
+                <label className="block text-sm font-medium text-gray-600 mb-2">日期</label>
                 <input
                   type="date"
                   value={date}
@@ -158,9 +159,7 @@ export function ExerciseRecordForm({ onRecordAdded, energyUnit = 'kcal' }: Exerc
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">
-                  时间
-                </label>
+                <label className="block text-sm font-medium text-gray-600 mb-2">时间</label>
                 <input
                   type="time"
                   value={time}
@@ -171,9 +170,7 @@ export function ExerciseRecordForm({ onRecordAdded, energyUnit = 'kcal' }: Exerc
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                运动时长
-              </label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">运动时长</label>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setMinutes(Math.max(5, minutes - 5))}
@@ -244,9 +241,7 @@ export function ExerciseRecordForm({ onRecordAdded, energyUnit = 'kcal' }: Exerc
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                备注 (可选)
-              </label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">备注 (可选)</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -267,5 +262,5 @@ export function ExerciseRecordForm({ onRecordAdded, energyUnit = 'kcal' }: Exerc
         )}
       </div>
     </div>
-  );
+  )
 }

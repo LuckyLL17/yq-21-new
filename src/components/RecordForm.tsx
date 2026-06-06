@@ -1,67 +1,63 @@
-import { useState } from 'react';
-import { Search, Plus, Minus, X, Check } from 'lucide-react';
-import type { Snack } from '../data/snacks';
-import { snacks, findSnackByName } from '../data/snacks';
-import { addRecordFromSnack } from '../data/records';
-import { getCaloriesLevel } from '../utils/snack';
+import { useState } from 'react'
+import { Search, Plus, Minus, X, Check } from 'lucide-react'
+import type { Snack } from '../data/snacks'
+import { snacks, findSnackByName } from '../data/snacks'
+import { addRecordFromSnack } from '../data/records'
+import { getCaloriesLevel } from '../utils/snack'
 
 interface RecordFormProps {
-  onRecordAdded?: () => void;
+  onRecordAdded?: () => void
 }
 
 export function RecordForm({ onRecordAdded }: RecordFormProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Snack[]>([]);
-  const [selectedSnack, setSelectedSnack] = useState<Snack | null>(null);
-  const [quantity, setQuantity] = useState(1);
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [time, setTime] = useState(new Date().toTimeString().slice(0, 5));
-  const [notes, setNotes] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<Snack[]>([])
+  const [selectedSnack, setSelectedSnack] = useState<Snack | null>(null)
+  const [quantity, setQuantity] = useState(1)
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [time, setTime] = useState(new Date().toTimeString().slice(0, 5))
+  const [notes, setNotes] = useState('')
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [showDropdown, setShowDropdown] = useState(false)
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
+    setSearchQuery(query)
     if (query.trim()) {
-      const results = findSnackByName(query);
-      setSearchResults(results);
+      const results = findSnackByName(query)
+      setSearchResults(results)
     } else {
-      setSearchResults(snacks.slice(0, 10));
+      setSearchResults(snacks.slice(0, 10))
     }
-    setShowDropdown(true);
-  };
+    setShowDropdown(true)
+  }
 
   const selectSnack = (snack: Snack) => {
-    setSelectedSnack(snack);
-    setSearchQuery(snack.name);
-    setShowDropdown(false);
-  };
+    setSelectedSnack(snack)
+    setSearchQuery(snack.name)
+    setShowDropdown(false)
+  }
 
   const handleSubmit = () => {
-    if (!selectedSnack) return;
+    if (!selectedSnack) return
 
-    addRecordFromSnack(selectedSnack, quantity, date, time, notes);
-    setShowSuccess(true);
+    addRecordFromSnack(selectedSnack, quantity, date, time, notes)
+    setShowSuccess(true)
 
     setTimeout(() => {
-      setShowSuccess(false);
-      setSelectedSnack(null);
-      setSearchQuery('');
-      setQuantity(1);
-      setNotes('');
-      onRecordAdded?.();
-    }, 1500);
-  };
+      setShowSuccess(false)
+      setSelectedSnack(null)
+      setSearchQuery('')
+      setQuantity(1)
+      setNotes('')
+      onRecordAdded?.()
+    }, 1500)
+  }
 
-  const caloriesLevel = selectedSnack
-    ? getCaloriesLevel(selectedSnack.calories * quantity)
-    : null;
+  const caloriesLevel = selectedSnack ? getCaloriesLevel(selectedSnack.calories * quantity) : null
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      <h3 className="font-semibold text-lg text-gray-800 mb-4">
-        添加热量记录
-      </h3>
+      <h3 className="font-semibold text-lg text-gray-800 mb-4">添加热量记录</h3>
 
       {showSuccess && (
         <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-xl flex items-center gap-2">
@@ -72,9 +68,7 @@ export function RecordForm({ onRecordAdded }: RecordFormProps) {
 
       <div className="space-y-4">
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            选择零食
-          </label>
+          <label className="block text-sm font-medium text-gray-600 mb-2">选择零食</label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -96,17 +90,13 @@ export function RecordForm({ onRecordAdded }: RecordFormProps) {
                   className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-b-0"
                 >
                   <div>
-                    <div className="font-medium text-gray-800">
-                      {snack.name}
-                    </div>
+                    <div className="font-medium text-gray-800">{snack.name}</div>
                     <div className="text-sm text-gray-500">
                       {snack.category} · {snack.servingSize}
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold text-primary-600">
-                      {snack.calories} kcal
-                    </div>
+                    <div className="font-semibold text-primary-600">{snack.calories} kcal</div>
                   </div>
                 </button>
               ))}
@@ -118,17 +108,15 @@ export function RecordForm({ onRecordAdded }: RecordFormProps) {
           <div className="p-4 bg-gray-50 rounded-xl space-y-4">
             <div className="flex items-start justify-between">
               <div>
-                <h4 className="font-semibold text-gray-800">
-                  {selectedSnack.name}
-                </h4>
+                <h4 className="font-semibold text-gray-800">{selectedSnack.name}</h4>
                 <p className="text-sm text-gray-500">
                   {selectedSnack.category} · {selectedSnack.servingSize}
                 </p>
               </div>
               <button
                 onClick={() => {
-                  setSelectedSnack(null);
-                  setSearchQuery('');
+                  setSelectedSnack(null)
+                  setSearchQuery('')
                 }}
                 className="p-1 hover:bg-gray-200 rounded-full"
               >
@@ -138,9 +126,7 @@ export function RecordForm({ onRecordAdded }: RecordFormProps) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">
-                  日期
-                </label>
+                <label className="block text-sm font-medium text-gray-600 mb-2">日期</label>
                 <input
                   type="date"
                   value={date}
@@ -149,9 +135,7 @@ export function RecordForm({ onRecordAdded }: RecordFormProps) {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">
-                  时间
-                </label>
+                <label className="block text-sm font-medium text-gray-600 mb-2">时间</label>
                 <input
                   type="time"
                   value={time}
@@ -162,9 +146,7 @@ export function RecordForm({ onRecordAdded }: RecordFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                数量
-              </label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">数量</label>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -172,27 +154,21 @@ export function RecordForm({ onRecordAdded }: RecordFormProps) {
                 >
                   <Minus className="w-4 h-4" />
                 </button>
-                <span className="w-12 text-center font-semibold text-lg">
-                  {quantity}
-                </span>
+                <span className="w-12 text-center font-semibold text-lg">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
                   className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
-                <span className="text-sm text-gray-500">
-                  份 × {selectedSnack.servingSize}
-                </span>
+                <span className="text-sm text-gray-500">份 × {selectedSnack.servingSize}</span>
               </div>
             </div>
 
             <div className="p-4 bg-white rounded-xl">
               <div className="grid grid-cols-4 gap-4 text-center">
                 <div>
-                  <div
-                    className={`text-xl font-bold ${caloriesLevel?.color || 'text-gray-800'}`}
-                  >
+                  <div className={`text-xl font-bold ${caloriesLevel?.color || 'text-gray-800'}`}>
                     {(selectedSnack.calories * quantity).toFixed(0)}
                   </div>
                   <div className="text-xs text-gray-500">热量 (kcal)</div>
@@ -224,9 +200,7 @@ export function RecordForm({ onRecordAdded }: RecordFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                备注 (可选)
-              </label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">备注 (可选)</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -246,5 +220,5 @@ export function RecordForm({ onRecordAdded }: RecordFormProps) {
         )}
       </div>
     </div>
-  );
+  )
 }

@@ -1,71 +1,72 @@
-import { useState, useMemo } from 'react';
-import { Scale, Ruler, Target, Lightbulb, ArrowRight } from 'lucide-react';
-import {
-  calculateBMI,
-  getBMICategory,
-  getIdealWeightRange,
-  type BMIResult
-} from '../utils/bmi';
-import { getSnackCalorieLimit } from '../utils/snack';
-import { snacks } from '../data/snacks';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo } from 'react'
+import { Scale, Ruler, Target, Lightbulb, ArrowRight } from 'lucide-react'
+import { calculateBMI, getBMICategory, getIdealWeightRange, type BMIResult } from '../utils/bmi'
+import { getSnackCalorieLimit } from '../utils/snack'
+import { snacks } from '../data/snacks'
+import { useNavigate } from 'react-router-dom'
 
 export function BMICalculator() {
-  const navigate = useNavigate();
-  const [height, setHeight] = useState<string>('170');
-  const [weight, setWeight] = useState<string>('65');
-  const [showResult, setShowResult] = useState(false);
+  const navigate = useNavigate()
+  const [height, setHeight] = useState<string>('170')
+  const [weight, setWeight] = useState<string>('65')
+  const [showResult, setShowResult] = useState(false)
 
   const bmiResult: BMIResult = useMemo(() => {
-    const heightNum = parseFloat(height);
-    const weightNum = parseFloat(weight);
+    const heightNum = parseFloat(height)
+    const weightNum = parseFloat(weight)
     if (isNaN(heightNum) || isNaN(weightNum) || heightNum <= 0 || weightNum <= 0) {
-      return getBMICategory(0);
+      return getBMICategory(0)
     }
-    const bmi = calculateBMI(heightNum, weightNum);
-    return getBMICategory(bmi);
-  }, [height, weight]);
+    const bmi = calculateBMI(heightNum, weightNum)
+    return getBMICategory(bmi)
+  }, [height, weight])
 
   const idealWeightRange = useMemo(() => {
-    const heightNum = parseFloat(height);
+    const heightNum = parseFloat(height)
     if (isNaN(heightNum) || heightNum <= 0) {
-      return { min: 0, max: 0 };
+      return { min: 0, max: 0 }
     }
-    return getIdealWeightRange(heightNum);
-  }, [height]);
+    return getIdealWeightRange(heightNum)
+  }, [height])
 
   const snackCalorieLimit = useMemo(() => {
-    return getSnackCalorieLimit(bmiResult.category);
-  }, [bmiResult.category]);
+    return getSnackCalorieLimit(bmiResult.category)
+  }, [bmiResult.category])
 
   const recommendedSnacks = useMemo(() => {
     return snacks
-      .filter(s => s.calories <= snackCalorieLimit.limit)
+      .filter((s) => s.calories <= snackCalorieLimit.limit)
       .sort((a, b) => b.calories - a.calories)
-      .slice(0, 4);
-  }, [snackCalorieLimit.limit]);
+      .slice(0, 4)
+  }, [snackCalorieLimit.limit])
 
   const handleCalculate = () => {
-    setShowResult(true);
-  };
+    setShowResult(true)
+  }
 
   const getBMIProgress = (bmi: number) => {
-    if (bmi <= 0) return 0;
-    if (bmi < 15) return 0;
-    if (bmi > 40) return 100;
-    return ((bmi - 15) / 25) * 100;
-  };
+    if (bmi <= 0) return 0
+    if (bmi < 15) return 0
+    if (bmi > 40) return 100
+    return ((bmi - 15) / 25) * 100
+  }
 
   const getBMIProgressColor = (category: string) => {
     switch (category) {
-      case 'underweight': return 'from-blue-400 to-blue-500';
-      case 'normal': return 'from-green-400 to-green-500';
-      case 'overweight': return 'from-yellow-400 to-yellow-500';
-      case 'obese': return 'from-orange-400 to-orange-500';
-      case 'severely-obese': return 'from-red-400 to-red-500';
-      default: return 'from-gray-400 to-gray-500';
+      case 'underweight':
+        return 'from-blue-400 to-blue-500'
+      case 'normal':
+        return 'from-green-400 to-green-500'
+      case 'overweight':
+        return 'from-yellow-400 to-yellow-500'
+      case 'obese':
+        return 'from-orange-400 to-orange-500'
+      case 'severely-obese':
+        return 'from-red-400 to-red-500'
+      default:
+        return 'from-gray-400 to-gray-500'
     }
-  };
+  }
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 card-shadow overflow-hidden">
@@ -75,9 +76,7 @@ export function BMICalculator() {
             <Scale className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="font-poppins text-xl md:text-2xl font-bold text-gray-800">
-              BMI 计算器
-            </h2>
+            <h2 className="font-poppins text-xl md:text-2xl font-bold text-gray-800">BMI 计算器</h2>
             <p className="text-sm text-gray-500">了解您的身体质量指数</p>
           </div>
         </div>
@@ -94,8 +93,8 @@ export function BMICalculator() {
               type="number"
               value={height}
               onChange={(e) => {
-                setHeight(e.target.value);
-                setShowResult(false);
+                setHeight(e.target.value)
+                setShowResult(false)
               }}
               placeholder="请输入身高"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all text-lg"
@@ -112,8 +111,8 @@ export function BMICalculator() {
               type="number"
               value={weight}
               onChange={(e) => {
-                setWeight(e.target.value);
-                setShowResult(false);
+                setWeight(e.target.value)
+                setShowResult(false)
               }}
               placeholder="请输入体重"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all text-lg"
@@ -133,11 +132,11 @@ export function BMICalculator() {
           <div className="mt-8 space-y-6 animate-fade-in">
             <div className="text-center">
               <div className="relative inline-flex items-center justify-center mb-4">
-                <div className={`w-32 h-32 rounded-full ${bmiResult.bgColor} flex items-center justify-center`}>
+                <div
+                  className={`w-32 h-32 rounded-full ${bmiResult.bgColor} flex items-center justify-center`}
+                >
                   <div className="text-center">
-                    <div className={`text-4xl font-bold ${bmiResult.color}`}>
-                      {bmiResult.bmi}
-                    </div>
+                    <div className={`text-4xl font-bold ${bmiResult.color}`}>{bmiResult.bmi}</div>
                     <div className={`text-sm font-medium ${bmiResult.color}`}>
                       {bmiResult.categoryName}
                     </div>
@@ -222,12 +221,8 @@ export function BMICalculator() {
                       onClick={() => navigate(`/snack/${snack.id}`)}
                       className="p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors"
                     >
-                      <div className="font-medium text-gray-800 text-sm truncate">
-                        {snack.name}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {snack.calories} 千卡
-                      </div>
+                      <div className="font-medium text-gray-800 text-sm truncate">{snack.name}</div>
+                      <div className="text-xs text-gray-500 mt-1">{snack.calories} 千卡</div>
                     </div>
                   ))}
                 </div>
@@ -237,5 +232,5 @@ export function BMICalculator() {
         )}
       </div>
     </div>
-  );
+  )
 }

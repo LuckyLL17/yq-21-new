@@ -18,9 +18,9 @@ graph TD
 
 ## 3. 路由定义
 
-| 路由 | 用途 |
-|------|------|
-| / | 首页，包含搜索框和热门零食 |
+| 路由       | 用途                                   |
+| ---------- | -------------------------------------- |
+| /          | 首页，包含搜索框和热门零食             |
 | /snack/:id | 零食详情页，展示热量、运动消耗、替代品 |
 
 ## 4. 数据模型
@@ -29,15 +29,15 @@ graph TD
 
 ```typescript
 interface Snack {
-  id: string;
-  name: string;
-  category: string;
-  servingSize: string;
-  calories: number;
-  protein: number;
-  fat: number;
-  carbs: number;
-  image?: string;
+  id: string
+  name: string
+  category: string
+  servingSize: string
+  calories: number
+  protein: number
+  fat: number
+  carbs: number
+  image?: string
 }
 ```
 
@@ -45,10 +45,10 @@ interface Snack {
 
 ```typescript
 interface Exercise {
-  id: string;
-  name: string;
-  icon: string;
-  metValue: number; // 代谢当量
+  id: string
+  name: string
+  icon: string
+  metValue: number // 代谢当量
 }
 ```
 
@@ -79,4 +79,3 @@ src/
 ├── App.tsx
 └── main.tsx
 ```
-

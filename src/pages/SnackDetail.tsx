@@ -1,20 +1,52 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Flame, Scale, Droplets, Wheat, ArrowLeft, Lightbulb, Dumbbell, User, X, Download, ChevronDown, Heart, Folder, Check, Tag, Plus, Edit2, Trash2, Zap, RefreshCw, Settings, Save, TrendingUp, TrendingDown, Equal } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import html2canvas from 'html2canvas';
-import { getSnackById, getAlternatives, TAG_INFO, getTagInfo, type AlternativeRecommendation } from '../data/snacks';
-import { getAllExercises, getIntensityLabel, type ExerciseIntensity } from '../data/exercises';
-import { getCaloriesLevel } from '../utils/snack';
-import { getWeightOptions } from '../utils/constants';
-import { kcalToKj, type EnergyUnit } from '../utils/energy';
-import { ERROR_MARGIN_DESCRIPTION } from '../utils/constants';
-import { ExerciseCard } from '../components/ExerciseCard';
-import { AlternativeCard } from '../components/AlternativeCard';
-import { useBrowsingHistory } from '../utils/useBrowsingHistory';
-import { useFavorites } from '../utils/useFavorites';
-import { useCustomTags } from '../utils/useCustomTags';
-import { useServingPresets } from '../utils/useServingPresets';
+import { useState, useRef, useEffect, useMemo } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import {
+  Flame,
+  Scale,
+  Droplets,
+  Wheat,
+  ArrowLeft,
+  Lightbulb,
+  Dumbbell,
+  User,
+  X,
+  Download,
+  ChevronDown,
+  Heart,
+  Folder,
+  Check,
+  Tag,
+  Plus,
+  Edit2,
+  Trash2,
+  Zap,
+  RefreshCw,
+  Settings,
+  Save,
+  TrendingUp,
+  TrendingDown,
+  Equal,
+} from 'lucide-react'
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
+import html2canvas from 'html2canvas'
+import {
+  getSnackById,
+  getAlternatives,
+  TAG_INFO,
+  getTagInfo,
+  type AlternativeRecommendation,
+} from '../data/snacks'
+import { getAllExercises, getIntensityLabel, type ExerciseIntensity } from '../data/exercises'
+import { getCaloriesLevel } from '../utils/snack'
+import { getWeightOptions } from '../utils/constants'
+import { kcalToKj, type EnergyUnit } from '../utils/energy'
+import { ERROR_MARGIN_DESCRIPTION } from '../utils/constants'
+import { ExerciseCard } from '../components/ExerciseCard'
+import { AlternativeCard } from '../components/AlternativeCard'
+import { useBrowsingHistory } from '../utils/useBrowsingHistory'
+import { useFavorites } from '../utils/useFavorites'
+import { useCustomTags } from '../utils/useCustomTags'
+import { useServingPresets } from '../utils/useServingPresets'
 import {
   calculateNutritionByWeight,
   getSliderRange,
@@ -22,196 +54,195 @@ import {
   formatNutritionValue,
   getUnitsFromWeight,
   type NutritionInfo,
-} from '../utils/serving';
+} from '../utils/serving'
 
 export function SnackDetail() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [weight, setWeight] = useState(65);
-  const [intensity, setIntensity] = useState<ExerciseIntensity>('medium');
-  const [energyUnit, setEnergyUnit] = useState<EnergyUnit>('kcal');
-  const [showAllExercises, setShowAllExercises] = useState(false);
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
-  const [showTagManager, setShowTagManager] = useState(false);
-  const [newTagName, setNewTagName] = useState('');
-  const [newTagColor, setNewTagColor] = useState('#3B82F6');
-  const [editingTagId, setEditingTagId] = useState<string | null>(null);
-  const [recommendationCount, setRecommendationCount] = useState(3);
-  const [refreshSeed, setRefreshSeed] = useState(Date.now());
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showCountMenu, setShowCountMenu] = useState(false);
-  const [currentWeightGrams, setCurrentWeightGrams] = useState<number | null>(null);
-  const [showPresetMenu, setShowPresetMenu] = useState(false);
-  const [showSavePresetModal, setShowSavePresetModal] = useState(false);
-  const [newPresetName, setNewPresetName] = useState('');
-  const [servingUnitMode, setServingUnitMode] = useState<'weight' | 'unit'>('weight');
-  const contentRef = useRef<HTMLDivElement>(null);
-  const countMenuRef = useRef<HTMLDivElement>(null);
-  const presetMenuRef = useRef<HTMLDivElement>(null);
-  const { addToHistory } = useBrowsingHistory();
-  const { isFavorite, toggleFavorite, categories, setSnackCategories, favorites } = useFavorites();
-  const { 
-    customTags, 
-    addCustomTag, 
-    removeCustomTag, 
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const [weight, setWeight] = useState(65)
+  const [intensity, setIntensity] = useState<ExerciseIntensity>('medium')
+  const [energyUnit, setEnergyUnit] = useState<EnergyUnit>('kcal')
+  const [showAllExercises, setShowAllExercises] = useState(false)
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false)
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false)
+  const [showTagManager, setShowTagManager] = useState(false)
+  const [newTagName, setNewTagName] = useState('')
+  const [newTagColor, setNewTagColor] = useState('#3B82F6')
+  const [editingTagId, setEditingTagId] = useState<string | null>(null)
+  const [recommendationCount, setRecommendationCount] = useState(3)
+  const [refreshSeed, setRefreshSeed] = useState(Date.now())
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [showCountMenu, setShowCountMenu] = useState(false)
+  const [currentWeightGrams, setCurrentWeightGrams] = useState<number | null>(null)
+  const [showPresetMenu, setShowPresetMenu] = useState(false)
+  const [showSavePresetModal, setShowSavePresetModal] = useState(false)
+  const [newPresetName, setNewPresetName] = useState('')
+  const [servingUnitMode, setServingUnitMode] = useState<'weight' | 'unit'>('weight')
+  const contentRef = useRef<HTMLDivElement>(null)
+  const countMenuRef = useRef<HTMLDivElement>(null)
+  const presetMenuRef = useRef<HTMLDivElement>(null)
+  const { addToHistory } = useBrowsingHistory()
+  const { isFavorite, toggleFavorite, categories, setSnackCategories, favorites } = useFavorites()
+  const {
+    customTags,
+    addCustomTag,
+    removeCustomTag,
     updateCustomTag,
-    getSnackTags, 
+    getSnackTags,
     toggleTagOnSnack,
-    defaultColors 
-  } = useCustomTags();
-  
-  const snack = id ? getSnackById(id) : undefined;
-  
-  const { presets, addPreset, removePreset } = useServingPresets(snack);
+    defaultColors,
+  } = useCustomTags()
 
-  const effectiveWeight = currentWeightGrams ?? snack?.baseWeightGrams ?? 100;
+  const snack = id ? getSnackById(id) : undefined
+
+  const { presets, addPreset, removePreset } = useServingPresets(snack)
+
+  const effectiveWeight = currentWeightGrams ?? snack?.baseWeightGrams ?? 100
 
   const currentNutrition: NutritionInfo = useMemo(() => {
-    if (!snack) return { calories: 0, protein: 0, fat: 0, carbs: 0 };
-    return calculateNutritionByWeight(snack, effectiveWeight);
-  }, [snack, effectiveWeight]);
+    if (!snack) return { calories: 0, protein: 0, fat: 0, carbs: 0 }
+    return calculateNutritionByWeight(snack, effectiveWeight)
+  }, [snack, effectiveWeight])
 
   const baseNutrition: NutritionInfo = useMemo(() => {
-    if (!snack) return { calories: 0, protein: 0, fat: 0, carbs: 0 };
-    return calculateNutritionByWeight(snack, snack.baseWeightGrams);
-  }, [snack]);
+    if (!snack) return { calories: 0, protein: 0, fat: 0, carbs: 0 }
+    return calculateNutritionByWeight(snack, snack.baseWeightGrams)
+  }, [snack])
 
-  const caloriesDiff = currentNutrition.calories - baseNutrition.calories;
-  const caloriesDiffPercent = baseNutrition.calories > 0 
-    ? ((currentNutrition.calories - baseNutrition.calories) / baseNutrition.calories) * 100 
-    : 0;
+  const caloriesDiff = currentNutrition.calories - baseNutrition.calories
+  const caloriesDiffPercent =
+    baseNutrition.calories > 0
+      ? ((currentNutrition.calories - baseNutrition.calories) / baseNutrition.calories) * 100
+      : 0
 
-  const sliderRange = snack ? getSliderRange(snack) : { min: 1, max: 500, step: 1 };
-  const quickAdjustOptions = getQuickAdjustOptions();
-  const currentUnits = snack ? getUnitsFromWeight(snack, effectiveWeight) : 1;
+  const sliderRange = snack ? getSliderRange(snack) : { min: 1, max: 500, step: 1 }
+  const quickAdjustOptions = getQuickAdjustOptions()
+  const currentUnits = snack ? getUnitsFromWeight(snack, effectiveWeight) : 1
 
-  const currentCaloriesLevel = getCaloriesLevel(currentNutrition.calories);
+  const currentCaloriesLevel = getCaloriesLevel(currentNutrition.calories)
 
   const handleWeightChange = (weight: number) => {
-    setCurrentWeightGrams(Math.max(sliderRange.min, Math.min(sliderRange.max, weight)));
-  };
+    setCurrentWeightGrams(Math.max(sliderRange.min, Math.min(sliderRange.max, weight)))
+  }
 
   const handleQuickAdjust = (multiplier: number) => {
-    if (!snack) return;
-    const newWeight = snack.baseWeightGrams * multiplier;
-    setCurrentWeightGrams(newWeight);
-  };
+    if (!snack) return
+    const newWeight = snack.baseWeightGrams * multiplier
+    setCurrentWeightGrams(newWeight)
+  }
 
   const handlePresetSelect = (weightGrams: number) => {
-    setCurrentWeightGrams(weightGrams);
-    setShowPresetMenu(false);
-  };
+    setCurrentWeightGrams(weightGrams)
+    setShowPresetMenu(false)
+  }
 
   const handleSavePreset = () => {
-    if (!newPresetName.trim()) return;
-    addPreset(newPresetName.trim(), effectiveWeight);
-    setNewPresetName('');
-    setShowSavePresetModal(false);
-  };
+    if (!newPresetName.trim()) return
+    addPreset(newPresetName.trim(), effectiveWeight)
+    setNewPresetName('')
+    setShowSavePresetModal(false)
+  }
 
   const handleRemovePreset = (presetId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation()
     if (confirm('确定要删除这个预设吗？')) {
-      removePreset(presetId);
+      removePreset(presetId)
     }
-  };
+  }
 
   const handleResetWeight = () => {
     if (snack) {
-      setCurrentWeightGrams(snack.baseWeightGrams);
+      setCurrentWeightGrams(snack.baseWeightGrams)
     }
-  };
-  
+  }
+
   const alternatives: AlternativeRecommendation[] = useMemo(() => {
-    if (!snack) return [];
-    return getAlternatives(snack, recommendationCount, { shuffle: true, seed: refreshSeed });
-  }, [snack, recommendationCount, refreshSeed]);
+    if (!snack) return []
+    return getAlternatives(snack, recommendationCount, { shuffle: true, seed: refreshSeed })
+  }, [snack, recommendationCount, refreshSeed])
 
   const handleRefreshRecommendations = () => {
-    setIsRefreshing(true);
-    setRefreshSeed(Date.now());
-    setTimeout(() => setIsRefreshing(false), 500);
-  };
+    setIsRefreshing(true)
+    setRefreshSeed(Date.now())
+    setTimeout(() => setIsRefreshing(false), 500)
+  }
 
   const handleCountChange = (count: number) => {
-    setRecommendationCount(count);
-    setShowCountMenu(false);
-  };
+    setRecommendationCount(count)
+    setShowCountMenu(false)
+  }
 
-  const countOptions = [3, 5, 8, 10];
-  const allExercises = getAllExercises();
-  const favorited = snack ? isFavorite(snack.id) : false;
-  const favoriteItem = snack ? favorites.find(f => f.snackId === snack.id) : null;
-  const selectedCategoryIds = favoriteItem?.categoryIds || [];
+  const countOptions = [3, 5, 8, 10]
+  const allExercises = getAllExercises()
+  const favorited = snack ? isFavorite(snack.id) : false
+  const favoriteItem = snack ? favorites.find((f) => f.snackId === snack.id) : null
+  const selectedCategoryIds = favoriteItem?.categoryIds || []
 
   useEffect(() => {
     if (snack) {
-      addToHistory(snack);
+      addToHistory(snack)
     }
-  }, [snack, addToHistory]);
+  }, [snack, addToHistory])
 
   const handleToggleFavorite = () => {
     if (snack) {
-      toggleFavorite(snack);
+      toggleFavorite(snack)
     }
-  };
+  }
 
   const handleCategoryToggle = (categoryId: string) => {
-    if (!snack) return;
+    if (!snack) return
     const newIds = selectedCategoryIds.includes(categoryId)
-      ? selectedCategoryIds.filter(id => id !== categoryId)
-      : [...selectedCategoryIds, categoryId];
-    setSnackCategories(snack.id, newIds);
-  };
+      ? selectedCategoryIds.filter((id) => id !== categoryId)
+      : [...selectedCategoryIds, categoryId]
+    setSnackCategories(snack.id, newIds)
+  }
 
   const handleAddCustomTag = () => {
-    if (!newTagName.trim()) return;
-    const newTag = addCustomTag(newTagName.trim(), newTagColor);
+    if (!newTagName.trim()) return
+    const newTag = addCustomTag(newTagName.trim(), newTagColor)
     if (snack) {
-      toggleTagOnSnack(snack.id, newTag.id);
+      toggleTagOnSnack(snack.id, newTag.id)
     }
-    setNewTagName('');
-    setNewTagColor(defaultColors[(customTags.length + 1) % defaultColors.length]);
-  };
+    setNewTagName('')
+    setNewTagColor(defaultColors[(customTags.length + 1) % defaultColors.length])
+  }
 
   const handleStartEditTag = (tagId: string) => {
-    const tag = customTags.find(t => t.id === tagId);
+    const tag = customTags.find((t) => t.id === tagId)
     if (tag) {
-      setEditingTagId(tagId);
-      setNewTagName(tag.name);
-      setNewTagColor(tag.color);
+      setEditingTagId(tagId)
+      setNewTagName(tag.name)
+      setNewTagColor(tag.color)
     }
-  };
+  }
 
   const handleSaveEditTag = () => {
-    if (!editingTagId || !newTagName.trim()) return;
-    updateCustomTag(editingTagId, newTagName.trim(), newTagColor);
-    setEditingTagId(null);
-    setNewTagName('');
-  };
+    if (!editingTagId || !newTagName.trim()) return
+    updateCustomTag(editingTagId, newTagName.trim(), newTagColor)
+    setEditingTagId(null)
+    setNewTagName('')
+  }
 
   const handleCancelEditTag = () => {
-    setEditingTagId(null);
-    setNewTagName('');
-    setNewTagColor(defaultColors[0]);
-  };
+    setEditingTagId(null)
+    setNewTagName('')
+    setNewTagColor(defaultColors[0])
+  }
 
   const handleToggleSnackTag = (tagId: string) => {
     if (snack) {
-      toggleTagOnSnack(snack.id, tagId);
+      toggleTagOnSnack(snack.id, tagId)
     }
-  };
+  }
 
-  const snackCustomTagIds = snack ? getSnackTags(snack.id) : [];
+  const snackCustomTagIds = snack ? getSnackTags(snack.id) : []
 
   if (!snack) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="font-poppins text-2xl font-bold text-gray-800 mb-2">
-            未找到该零食
-          </h2>
+          <h2 className="font-poppins text-2xl font-bold text-gray-800 mb-2">未找到该零食</h2>
           <p className="text-gray-500 mb-6">请返回首页重新搜索</p>
           <button
             onClick={() => navigate('/')}
@@ -222,54 +253,54 @@ export function SnackDetail() {
           </button>
         </div>
       </div>
-    );
+    )
   }
 
   const categoryEmojis: Record<string, string> = {
-    '膨化食品': '🍿',
-    '巧克力': '🍫',
-    '饼干': '🍪',
-    '冰淇淋': '🍦',
-    '糖果': '🍬',
-    '坚果': '🥜',
-    '油炸食品': '🍟',
-    '糕点': '🍩',
-    '果干': '🥭',
-    '乳制品': '🥛',
-    '饮料': '🧋',
-    '方便食品': '🍜',
-  };
+    膨化食品: '🍿',
+    巧克力: '🍫',
+    饼干: '🍪',
+    冰淇淋: '🍦',
+    糖果: '🍬',
+    坚果: '🥜',
+    油炸食品: '🍟',
+    糕点: '🍩',
+    果干: '🥭',
+    乳制品: '🥛',
+    饮料: '🧋',
+    方便食品: '🍜',
+  }
 
-  const emoji = categoryEmojis[snack.category] || '🍴';
+  const emoji = categoryEmojis[snack.category] || '🍴'
 
   const nutritionData = [
     { name: '蛋白质', value: currentNutrition.protein * 4, color: '#F97316' },
     { name: '脂肪', value: currentNutrition.fat * 9, color: '#EAB308' },
     { name: '碳水化合物', value: currentNutrition.carbs * 4, color: '#3B82F6' },
-  ];
+  ]
 
   const handleGenerateImage = async () => {
-    if (!contentRef.current) return;
-    
-    setIsGeneratingImage(true);
+    if (!contentRef.current) return
+
+    setIsGeneratingImage(true)
     try {
       const canvas = await html2canvas(contentRef.current, {
         backgroundColor: '#F9FAFB',
         scale: 2,
         useCORS: true,
-      });
-      
-      const link = document.createElement('a');
-      link.download = `${snack.name}-热量分析.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      })
+
+      const link = document.createElement('a')
+      link.download = `${snack.name}-热量分析.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
     } catch (error) {
-      console.error('生成图片失败:', error);
-      alert('生成图片失败，请重试');
+      console.error('生成图片失败:', error)
+      alert('生成图片失败，请重试')
     } finally {
-      setIsGeneratingImage(false);
+      setIsGeneratingImage(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -282,7 +313,7 @@ export function SnackDetail() {
             <ArrowLeft className="w-5 h-5" />
             <span>返回搜索</span>
           </button>
-          
+
           <div className="flex items-center gap-3">
             <div className="relative">
               <button
@@ -296,7 +327,7 @@ export function SnackDetail() {
                 <Heart className="w-5 h-5" fill={favorited ? 'currentColor' : 'none'} />
                 <span>{favorited ? '已收藏' : '收藏'}</span>
               </button>
-              
+
               {favorited && (
                 <button
                   onClick={() => setShowCategoryMenu(!showCategoryMenu)}
@@ -309,33 +340,32 @@ export function SnackDetail() {
 
               {showCategoryMenu && (
                 <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setShowCategoryMenu(false)}
-                  />
+                  <div className="fixed inset-0 z-40" onClick={() => setShowCategoryMenu(false)} />
                   <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                     <div className="px-4 py-2 border-b border-gray-100">
                       <p className="text-sm font-medium text-gray-800">选择分类</p>
                     </div>
-                    {categories.filter(c => c.id !== 'all').map((category) => (
-                      <button
-                        key={category.id}
-                        onClick={() => handleCategoryToggle(category.id)}
-                        className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center justify-between transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: category.color }}
-                          />
-                          <span className="text-sm text-gray-700">{category.name}</span>
-                        </div>
-                        {selectedCategoryIds.includes(category.id) && (
-                          <Check className="w-4 h-4 text-primary-500" />
-                        )}
-                      </button>
-                    ))}
-                    {categories.filter(c => c.id !== 'all').length === 0 && (
+                    {categories
+                      .filter((c) => c.id !== 'all')
+                      .map((category) => (
+                        <button
+                          key={category.id}
+                          onClick={() => handleCategoryToggle(category.id)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center justify-between transition-colors"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: category.color }}
+                            />
+                            <span className="text-sm text-gray-700">{category.name}</span>
+                          </div>
+                          {selectedCategoryIds.includes(category.id) && (
+                            <Check className="w-4 h-4 text-primary-500" />
+                          )}
+                        </button>
+                      ))}
+                    {categories.filter((c) => c.id !== 'all').length === 0 && (
                       <div className="px-4 py-3 text-center text-sm text-gray-500">
                         暂无自定义分类
                       </div>
@@ -344,7 +374,7 @@ export function SnackDetail() {
                 </>
               )}
             </div>
-            
+
             <button
               onClick={handleGenerateImage}
               disabled={isGeneratingImage}
@@ -362,7 +392,7 @@ export function SnackDetail() {
               <div className="w-full md:w-48 h-48 md:h-48 rounded-2xl bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center flex-shrink-0">
                 <span className="text-7xl">{emoji}</span>
               </div>
-              
+
               <div className="flex-1">
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
@@ -372,23 +402,32 @@ export function SnackDetail() {
                     <p className="text-gray-500 mt-1">
                       标准份量：{snack.servingSize}
                       {caloriesDiff !== 0 && (
-                        <span className={`ml-2 text-sm font-medium ${caloriesDiff > 0 ? 'text-orange-500' : 'text-green-500'}`}>
-                          (当前 {caloriesDiff > 0 ? '+' : ''}{formatNutritionValue(caloriesDiff)} 千卡)
+                        <span
+                          className={`ml-2 text-sm font-medium ${caloriesDiff > 0 ? 'text-orange-500' : 'text-green-500'}`}
+                        >
+                          (当前 {caloriesDiff > 0 ? '+' : ''}
+                          {formatNutritionValue(caloriesDiff)} 千卡)
                         </span>
                       )}
                     </p>
                   </div>
-                  <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    currentCaloriesLevel?.level === '低' ? 'bg-green-100 text-green-600' :
-                    currentCaloriesLevel?.level === '中低' ? 'bg-emerald-100 text-emerald-600' :
-                    currentCaloriesLevel?.level === '中' ? 'bg-yellow-100 text-yellow-600' :
-                    currentCaloriesLevel?.level === '高' ? 'bg-orange-100 text-orange-600' :
-                    'bg-red-100 text-red-600'
-                  }`}>
+                  <span
+                    className={`px-4 py-2 rounded-full text-sm font-medium ${
+                      currentCaloriesLevel?.level === '低'
+                        ? 'bg-green-100 text-green-600'
+                        : currentCaloriesLevel?.level === '中低'
+                          ? 'bg-emerald-100 text-emerald-600'
+                          : currentCaloriesLevel?.level === '中'
+                            ? 'bg-yellow-100 text-yellow-600'
+                            : currentCaloriesLevel?.level === '高'
+                              ? 'bg-orange-100 text-orange-600'
+                              : 'bg-red-100 text-red-600'
+                    }`}
+                  >
                     {currentCaloriesLevel?.level}热量
                   </span>
                 </div>
-                
+
                 <div className="flex items-baseline gap-2 mb-2">
                   <Flame className="w-8 h-8 text-orange-500" />
                   <span className="font-poppins text-4xl font-bold text-gray-800">
@@ -405,35 +444,44 @@ export function SnackDetail() {
                       <TrendingDown className="w-4 h-4 text-green-500" />
                     )}
                     <span className={caloriesDiff > 0 ? 'text-orange-500' : 'text-green-500'}>
-                      比标准份量{caloriesDiff > 0 ? '多' : '少'} {formatNutritionValue(Math.abs(caloriesDiff))} 千卡 ({caloriesDiffPercent > 0 ? '+' : ''}{caloriesDiffPercent.toFixed(1)}%)
+                      比标准份量{caloriesDiff > 0 ? '多' : '少'}{' '}
+                      {formatNutritionValue(Math.abs(caloriesDiff))} 千卡 (
+                      {caloriesDiffPercent > 0 ? '+' : ''}
+                      {caloriesDiffPercent.toFixed(1)}%)
                     </span>
                   </div>
                 )}
-                
+
                 <p className={`text-base ${currentCaloriesLevel?.color} font-medium mb-6`}>
                   {currentCaloriesLevel?.message}
                 </p>
-                
+
                 <div className="grid grid-cols-3 gap-4">
                   <div className="p-4 bg-gray-50 rounded-2xl text-center">
                     <div className="w-10 h-10 mx-auto rounded-xl bg-orange-100 flex items-center justify-center mb-2">
                       <Dumbbell className="w-5 h-5 text-orange-600" />
                     </div>
-                    <p className="font-poppins text-xl font-bold text-gray-800">{formatNutritionValue(currentNutrition.protein)}g</p>
+                    <p className="font-poppins text-xl font-bold text-gray-800">
+                      {formatNutritionValue(currentNutrition.protein)}g
+                    </p>
                     <p className="text-xs text-gray-500">蛋白质</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-2xl text-center">
                     <div className="w-10 h-10 mx-auto rounded-xl bg-yellow-100 flex items-center justify-center mb-2">
                       <Droplets className="w-5 h-5 text-yellow-600" />
                     </div>
-                    <p className="font-poppins text-xl font-bold text-gray-800">{formatNutritionValue(currentNutrition.fat)}g</p>
+                    <p className="font-poppins text-xl font-bold text-gray-800">
+                      {formatNutritionValue(currentNutrition.fat)}g
+                    </p>
                     <p className="text-xs text-gray-500">脂肪</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-2xl text-center">
                     <div className="w-10 h-10 mx-auto rounded-xl bg-blue-100 flex items-center justify-center mb-2">
                       <Wheat className="w-5 h-5 text-blue-600" />
                     </div>
-                    <p className="font-poppins text-xl font-bold text-gray-800">{formatNutritionValue(currentNutrition.carbs)}g</p>
+                    <p className="font-poppins text-xl font-bold text-gray-800">
+                      {formatNutritionValue(currentNutrition.carbs)}g
+                    </p>
                     <p className="text-xs text-gray-500">碳水化合物</p>
                   </div>
                 </div>
@@ -483,10 +531,9 @@ export function SnackDetail() {
                   <span className="text-sm text-gray-600">
                     当前份量：
                     <span className="font-semibold text-gray-800">
-                      {servingUnitMode === 'weight' 
+                      {servingUnitMode === 'weight'
                         ? `${Math.round(effectiveWeight)} g`
-                        : `${currentUnits.toFixed(2)} ${snack?.unitLabel || '份'}`
-                      }
+                        : `${currentUnits.toFixed(2)} ${snack?.unitLabel || '份'}`}
                     </span>
                   </span>
                   <div className="flex items-center gap-2">
@@ -499,7 +546,7 @@ export function SnackDetail() {
                         预设
                         <ChevronDown className="w-4 h-4" />
                       </button>
-                      
+
                       {showPresetMenu && (
                         <>
                           <div
@@ -518,7 +565,14 @@ export function SnackDetail() {
                               >
                                 <div>
                                   <p className="text-sm font-medium text-gray-800">{preset.name}</p>
-                                  <p className="text-xs text-gray-500">{Math.round(preset.weightGrams)}g · {formatNutritionValue(calculateNutritionByWeight(snack!, preset.weightGrams).calories)} 千卡</p>
+                                  <p className="text-xs text-gray-500">
+                                    {Math.round(preset.weightGrams)}g ·{' '}
+                                    {formatNutritionValue(
+                                      calculateNutritionByWeight(snack!, preset.weightGrams)
+                                        .calories,
+                                    )}{' '}
+                                    千卡
+                                  </p>
                                 </div>
                                 {!(preset as any).isDefault && (
                                   <button
@@ -556,11 +610,11 @@ export function SnackDetail() {
                   step={sliderRange.step}
                   value={servingUnitMode === 'weight' ? effectiveWeight : currentUnits}
                   onChange={(e) => {
-                    const value = Number(e.target.value);
+                    const value = Number(e.target.value)
                     if (servingUnitMode === 'weight') {
-                      handleWeightChange(value);
+                      handleWeightChange(value)
                     } else {
-                      setCurrentWeightGrams(snack!.baseWeightGrams * value);
+                      setCurrentWeightGrams(snack!.baseWeightGrams * value)
                     }
                   }}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-500"
@@ -592,13 +646,17 @@ export function SnackDetail() {
                 <div className="flex items-center gap-2 flex-1">
                   <input
                     type="number"
-                    value={servingUnitMode === 'weight' ? Math.round(effectiveWeight) : currentUnits.toFixed(2)}
+                    value={
+                      servingUnitMode === 'weight'
+                        ? Math.round(effectiveWeight)
+                        : currentUnits.toFixed(2)
+                    }
                     onChange={(e) => {
-                      const value = Number(e.target.value);
+                      const value = Number(e.target.value)
                       if (servingUnitMode === 'weight') {
-                        handleWeightChange(value);
+                        handleWeightChange(value)
                       } else {
-                        setCurrentWeightGrams(snack!.baseWeightGrams * Math.max(0.01, value));
+                        setCurrentWeightGrams(snack!.baseWeightGrams * Math.max(0.01, value))
                       }
                     }}
                     className="w-24 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-center focus:outline-none focus:ring-2 focus:ring-primary-200"
@@ -628,9 +686,13 @@ export function SnackDetail() {
                     </p>
                     <p className="text-xs text-gray-400 mt-1">{snack?.baseWeightGrams}g</p>
                   </div>
-                  <div className={`p-4 rounded-xl ${caloriesDiff > 0 ? 'bg-orange-50' : 'bg-green-50'}`}>
+                  <div
+                    className={`p-4 rounded-xl ${caloriesDiff > 0 ? 'bg-orange-50' : 'bg-green-50'}`}
+                  >
                     <p className="text-sm text-gray-500 mb-1">当前份量</p>
-                    <p className={`text-2xl font-bold ${caloriesDiff > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                    <p
+                      className={`text-2xl font-bold ${caloriesDiff > 0 ? 'text-orange-600' : 'text-green-600'}`}
+                    >
                       {formatNutritionValue(currentNutrition.calories)}
                       <span className="text-sm font-normal text-gray-500 ml-1">千卡</span>
                     </p>
@@ -640,17 +702,21 @@ export function SnackDetail() {
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500">差异</span>
-                    <span className={`font-semibold ${caloriesDiff > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-                      {caloriesDiff > 0 ? '+' : ''}{formatNutritionValue(caloriesDiff)} 千卡
+                    <span
+                      className={`font-semibold ${caloriesDiff > 0 ? 'text-orange-600' : 'text-green-600'}`}
+                    >
+                      {caloriesDiff > 0 ? '+' : ''}
+                      {formatNutritionValue(caloriesDiff)} 千卡
                       <span className="text-gray-400 font-normal ml-1">
-                        ({caloriesDiffPercent > 0 ? '+' : ''}{caloriesDiffPercent.toFixed(1)}%)
+                        ({caloriesDiffPercent > 0 ? '+' : ''}
+                        {caloriesDiffPercent.toFixed(1)}%)
                       </span>
                     </span>
                   </div>
                 </div>
               </div>
             )}
-            
+
             <div className="mt-8 pt-6 border-t border-gray-100">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-poppins text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -665,14 +731,14 @@ export function SnackDetail() {
                   管理标签
                 </button>
               </div>
-              
+
               <div className="flex flex-wrap gap-2">
                 {snack.tags.length === 0 && snackCustomTagIds.length === 0 ? (
                   <p className="text-sm text-gray-400">暂无标签</p>
                 ) : (
                   <>
                     {snack.tags.map((tagId) => {
-                      const tagInfo = getTagInfo(tagId);
+                      const tagInfo = getTagInfo(tagId)
                       return tagInfo ? (
                         <span
                           key={tagId}
@@ -680,10 +746,10 @@ export function SnackDetail() {
                         >
                           {tagInfo.name}
                         </span>
-                      ) : null;
+                      ) : null
                     })}
                     {snackCustomTagIds.map((tagId) => {
-                      const tag = customTags.find(t => t.id === tagId);
+                      const tag = customTags.find((t) => t.id === tagId)
                       return tag ? (
                         <span
                           key={tagId}
@@ -692,7 +758,7 @@ export function SnackDetail() {
                         >
                           {tag.name}
                         </span>
-                      ) : null;
+                      ) : null
                     })}
                   </>
                 )}
@@ -701,12 +767,12 @@ export function SnackDetail() {
               {showTagManager && (
                 <div className="mt-6 p-5 bg-gray-50 rounded-2xl">
                   <h4 className="font-semibold text-gray-700 mb-4">为零食添加标签</h4>
-                  
+
                   <div className="mb-4">
                     <p className="text-xs text-gray-500 mb-2">系统标签</p>
                     <div className="flex flex-wrap gap-2">
                       {TAG_INFO.map((tag) => {
-                        const isSelected = snack.tags.includes(tag.id);
+                        const isSelected = snack.tags.includes(tag.id)
                         return (
                           <button
                             key={tag.id}
@@ -721,7 +787,7 @@ export function SnackDetail() {
                           >
                             {tag.name}
                           </button>
-                        );
+                        )
                       })}
                     </div>
                     <p className="text-xs text-gray-400 mt-1.5">系统标签由平台预设</p>
@@ -729,7 +795,7 @@ export function SnackDetail() {
 
                   <div>
                     <p className="text-xs text-gray-500 mb-2">自定义标签</p>
-                    
+
                     {editingTagId ? (
                       <div className="mb-4 p-4 bg-white rounded-xl border border-gray-200">
                         <input
@@ -746,7 +812,9 @@ export function SnackDetail() {
                               key={color}
                               onClick={() => setNewTagColor(color)}
                               className={`w-7 h-7 rounded-full transition-transform ${
-                                newTagColor === color ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : ''
+                                newTagColor === color
+                                  ? 'ring-2 ring-offset-2 ring-gray-400 scale-110'
+                                  : ''
                               }`}
                               style={{ backgroundColor: color }}
                             />
@@ -777,7 +845,7 @@ export function SnackDetail() {
                           className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-200"
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
-                              handleAddCustomTag();
+                              handleAddCustomTag()
                             }
                           }}
                         />
@@ -794,7 +862,7 @@ export function SnackDetail() {
                     {customTags.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {customTags.map((tag) => {
-                          const isSelected = snackCustomTagIds.includes(tag.id);
+                          const isSelected = snackCustomTagIds.includes(tag.id)
                           return (
                             <div key={tag.id} className="relative group">
                               <button
@@ -812,8 +880,8 @@ export function SnackDetail() {
                               <div className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5">
                                 <button
                                   onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleStartEditTag(tag.id);
+                                    e.stopPropagation()
+                                    handleStartEditTag(tag.id)
                                   }}
                                   className="w-5 h-5 bg-white rounded-full shadow flex items-center justify-center hover:bg-gray-100 text-gray-500"
                                 >
@@ -821,9 +889,9 @@ export function SnackDetail() {
                                 </button>
                                 <button
                                   onClick={(e) => {
-                                    e.stopPropagation();
+                                    e.stopPropagation()
                                     if (confirm(`确定要删除标签"${tag.name}"吗？`)) {
-                                      removeCustomTag(tag.id);
+                                      removeCustomTag(tag.id)
                                     }
                                   }}
                                   className="w-5 h-5 bg-white rounded-full shadow flex items-center justify-center hover:bg-red-50 text-red-500"
@@ -832,7 +900,7 @@ export function SnackDetail() {
                                 </button>
                               </div>
                             </div>
-                          );
+                          )
                         })}
                       </div>
                     ) : (
@@ -842,7 +910,7 @@ export function SnackDetail() {
                 </div>
               )}
             </div>
-            
+
             <div className="mt-8 pt-6 border-t border-gray-100">
               <h3 className="font-poppins text-lg font-bold text-gray-800 mb-4">营养成分占比</h3>
               <div className="h-64">
@@ -862,9 +930,13 @@ export function SnackDetail() {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip 
+                    <Tooltip
                       formatter={(value) => [`${value} 千卡`, '热量']}
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                      contentStyle={{
+                        borderRadius: '12px',
+                        border: 'none',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      }}
                     />
                     <Legend />
                   </PieChart>
@@ -886,7 +958,7 @@ export function SnackDetail() {
                   <p className="text-sm text-gray-500">基于你的体重和运动强度计算</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3 flex-wrap">
                 <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-1">
                   <button
@@ -910,7 +982,7 @@ export function SnackDetail() {
                     千焦
                   </button>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-gray-400" />
                   <select
@@ -919,13 +991,15 @@ export function SnackDetail() {
                     className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-200"
                   >
                     {getWeightOptions().map((w) => (
-                      <option key={w} value={w}>{w} kg</option>
+                      <option key={w} value={w}>
+                        {w} kg
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
             </div>
-            
+
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="w-4 h-4 text-orange-500" />
@@ -947,10 +1021,14 @@ export function SnackDetail() {
                 ))}
               </div>
             </div>
-            
+
             <div className="mb-6">
               <ExerciseCard
-                snack={{ ...snack, calories: currentNutrition.calories, servingSize: `${Math.round(effectiveWeight)}g` }}
+                snack={{
+                  ...snack,
+                  calories: currentNutrition.calories,
+                  servingSize: `${Math.round(effectiveWeight)}g`,
+                }}
                 exercise={allExercises[0]}
                 weight={weight}
                 intensity={intensity}
@@ -959,12 +1037,16 @@ export function SnackDetail() {
                 showRange
               />
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {allExercises.slice(1, 6).map((exercise) => (
                 <ExerciseCard
                   key={exercise.id}
-                  snack={{ ...snack, calories: currentNutrition.calories, servingSize: `${Math.round(effectiveWeight)}g` }}
+                  snack={{
+                    ...snack,
+                    calories: currentNutrition.calories,
+                    servingSize: `${Math.round(effectiveWeight)}g`,
+                  }}
                   exercise={exercise}
                   weight={weight}
                   intensity={intensity}
@@ -973,7 +1055,7 @@ export function SnackDetail() {
                 />
               ))}
             </div>
-            
+
             <div className="mt-6 flex justify-center">
               <button
                 onClick={() => setShowAllExercises(true)}
@@ -983,12 +1065,10 @@ export function SnackDetail() {
                 <ChevronDown className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="mt-6 p-4 bg-blue-50 rounded-xl flex items-start gap-3">
               <Zap className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-blue-700">
-                {ERROR_MARGIN_DESCRIPTION}
-              </p>
+              <p className="text-sm text-blue-700">{ERROR_MARGIN_DESCRIPTION}</p>
             </div>
           </div>
 
@@ -1006,7 +1086,7 @@ export function SnackDetail() {
                     <p className="text-sm text-gray-500">满足口腹之欲的同时减少热量摄入</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <div className="relative" ref={countMenuRef}>
                     <button
@@ -1017,7 +1097,7 @@ export function SnackDetail() {
                       <span className="text-sm">推荐 {recommendationCount} 个</span>
                       <ChevronDown className="w-4 h-4" />
                     </button>
-                    
+
                     {showCountMenu && (
                       <>
                         <div
@@ -1033,20 +1113,20 @@ export function SnackDetail() {
                               key={count}
                               onClick={() => handleCountChange(count)}
                               className={`w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center justify-between transition-colors ${
-                                recommendationCount === count ? 'bg-primary-50 text-primary-600' : 'text-gray-700'
+                                recommendationCount === count
+                                  ? 'bg-primary-50 text-primary-600'
+                                  : 'text-gray-700'
                               }`}
                             >
                               <span className="text-sm">{count} 个</span>
-                              {recommendationCount === count && (
-                                <Check className="w-4 h-4" />
-                              )}
+                              {recommendationCount === count && <Check className="w-4 h-4" />}
                             </button>
                           ))}
                         </div>
                       </>
                     )}
                   </div>
-                  
+
                   <button
                     onClick={handleRefreshRecommendations}
                     disabled={isRefreshing}
@@ -1057,13 +1137,12 @@ export function SnackDetail() {
                   </button>
                 </div>
               </div>
-              
-              <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-opacity duration-300 ${isRefreshing ? 'opacity-50' : 'opacity-100'}`}>
+
+              <div
+                className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-opacity duration-300 ${isRefreshing ? 'opacity-50' : 'opacity-100'}`}
+              >
                 {alternatives.map((alt) => (
-                  <AlternativeCard
-                    key={alt.snack.id + '-' + refreshSeed}
-                    recommendation={alt}
-                  />
+                  <AlternativeCard key={alt.snack.id + '-' + refreshSeed} recommendation={alt} />
                 ))}
               </div>
             </div>
@@ -1086,7 +1165,8 @@ export function SnackDetail() {
             <div className="mb-4">
               <p className="text-sm text-gray-500 mb-2">当前份量</p>
               <p className="text-lg font-semibold text-gray-800">
-                {Math.round(effectiveWeight)}g · {formatNutritionValue(currentNutrition.calories)} 千卡
+                {Math.round(effectiveWeight)}g · {formatNutritionValue(currentNutrition.calories)}{' '}
+                千卡
               </p>
             </div>
             <div className="mb-4">
@@ -1100,7 +1180,7 @@ export function SnackDetail() {
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    handleSavePreset();
+                    handleSavePreset()
                   }
                 }}
               />
@@ -1133,14 +1213,11 @@ export function SnackDetail() {
                   <Scale className="w-5 h-5 text-primary-600" />
                 </div>
                 <div>
-                  <h2 className="font-poppins text-xl font-bold text-gray-800">
-                    全部运动类型
-                  </h2>
+                  <h2 className="font-poppins text-xl font-bold text-gray-800">全部运动类型</h2>
                   <p className="text-sm text-gray-500">
-                    {energyUnit === 'kJ' 
+                    {energyUnit === 'kJ'
                       ? `消耗约 ${Math.round(kcalToKj(currentNutrition.calories))} 千焦所需时间`
-                      : `消耗 ${formatNutritionValue(currentNutrition.calories)} 千卡所需时间`
-                    }
+                      : `消耗 ${formatNutritionValue(currentNutrition.calories)} 千卡所需时间`}
                   </p>
                 </div>
               </div>
@@ -1151,7 +1228,7 @@ export function SnackDetail() {
                 <X className="w-5 h-5 text-gray-600" />
               </button>
             </div>
-            
+
             <div className="mb-4 flex flex-wrap gap-3">
               <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-1">
                 <button
@@ -1175,7 +1252,7 @@ export function SnackDetail() {
                   千焦
                 </button>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-gray-400" />
                 <select
@@ -1184,12 +1261,14 @@ export function SnackDetail() {
                   className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-200"
                 >
                   {getWeightOptions().map((w) => (
-                    <option key={w} value={w}>{w} kg</option>
+                    <option key={w} value={w}>
+                      {w} kg
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
-            
+
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="w-4 h-4 text-orange-500" />
@@ -1211,12 +1290,16 @@ export function SnackDetail() {
                 ))}
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {allExercises.map((exercise) => (
                 <ExerciseCard
                   key={exercise.id}
-                  snack={{ ...snack, calories: currentNutrition.calories, servingSize: `${Math.round(effectiveWeight)}g` }}
+                  snack={{
+                    ...snack,
+                    calories: currentNutrition.calories,
+                    servingSize: `${Math.round(effectiveWeight)}g`,
+                  }}
                   exercise={exercise}
                   weight={weight}
                   intensity={intensity}
@@ -1225,16 +1308,14 @@ export function SnackDetail() {
                 />
               ))}
             </div>
-            
+
             <div className="mt-6 p-4 bg-blue-50 rounded-xl flex items-start gap-3">
               <Zap className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-blue-700">
-                {ERROR_MARGIN_DESCRIPTION}
-              </p>
+              <p className="text-sm text-blue-700">{ERROR_MARGIN_DESCRIPTION}</p>
             </div>
           </div>
         </div>
       )}
     </div>
-  );
+  )
 }

@@ -1,50 +1,50 @@
-import { useState } from 'react';
-import { Heart, Apple, Dumbbell, Moon, Droplets, Leaf } from 'lucide-react';
-import { BMICalculator } from '../components/BMICalculator';
-import { HealthTipsCarousel } from '../components/HealthTipsCarousel';
-import { getHealthTipByIndex } from '../utils/health';
+import { useState } from 'react'
+import { Heart, Apple, Dumbbell, Moon, Droplets, Leaf } from 'lucide-react'
+import { BMICalculator } from '../components/BMICalculator'
+import { HealthTipsCarousel } from '../components/HealthTipsCarousel'
+import { getHealthTipByIndex } from '../utils/health'
 
 export function Health() {
-  const [activeTab, setActiveTab] = useState<'bmi' | 'tips' | 'knowledge'>('bmi');
+  const [activeTab, setActiveTab] = useState<'bmi' | 'tips' | 'knowledge'>('bmi')
 
   const healthKnowledge = [
     {
       icon: Apple,
       title: '均衡饮食',
       description: '每天摄入五谷杂粮、蔬菜水果、优质蛋白，保证营养全面均衡',
-      color: 'from-green-400 to-emerald-500'
+      color: 'from-green-400 to-emerald-500',
     },
     {
       icon: Dumbbell,
       title: '规律运动',
       description: '每周至少150分钟中等强度运动，结合有氧和力量训练',
-      color: 'from-blue-400 to-indigo-500'
+      color: 'from-blue-400 to-indigo-500',
     },
     {
       icon: Moon,
       title: '充足睡眠',
       description: '成年人每天保证7-8小时睡眠，有利于身体恢复和新陈代谢',
-      color: 'from-purple-400 to-violet-500'
+      color: 'from-purple-400 to-violet-500',
     },
     {
       icon: Droplets,
       title: '多喝水',
       description: '每天饮用1500-2000ml水，促进新陈代谢和废物排出',
-      color: 'from-cyan-400 to-blue-500'
+      color: 'from-cyan-400 to-blue-500',
     },
     {
       icon: Leaf,
       title: '多吃蔬果',
       description: '每天摄入500g以上蔬菜水果，补充维生素和膳食纤维',
-      color: 'from-lime-400 to-green-500'
+      color: 'from-lime-400 to-green-500',
     },
     {
       icon: Heart,
       title: '保持心态',
       description: '保持积极乐观的心态，减少压力，有益于身心健康',
-      color: 'from-pink-400 to-rose-500'
-    }
-  ];
+      color: 'from-pink-400 to-rose-500',
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 md:py-12">
@@ -104,7 +104,7 @@ export function Health() {
             </div>
             <div className="space-y-6">
               <HealthTipsCarousel />
-              
+
               <div className="bg-white rounded-3xl border border-gray-100 card-shadow p-6">
                 <h3 className="font-semibold text-gray-800 mb-4">BMI 分类标准</h3>
                 <div className="space-y-3">
@@ -155,7 +155,7 @@ export function Health() {
         {activeTab === 'tips' && (
           <div className="max-w-3xl mx-auto">
             <HealthTipsCarousel interval={8000} />
-            
+
             <div className="mt-8 grid gap-4">
               {[0, 1, 2, 3, 4].map((index) => (
                 <div
@@ -184,15 +184,15 @@ export function Health() {
                   key={index}
                   className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 card-shadow card-hover"
                 >
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-5`}>
+                  <div
+                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-5`}
+                  >
                     <item.icon className="w-7 h-7 text-white" />
                   </div>
                   <h3 className="font-poppins text-xl font-semibold text-gray-800 mb-3">
                     {item.title}
                   </h3>
-                  <p className="text-gray-500 leading-relaxed">
-                    {item.description}
-                  </p>
+                  <p className="text-gray-500 leading-relaxed">{item.description}</p>
                 </div>
               ))}
             </div>
@@ -204,7 +204,7 @@ export function Health() {
                 </h2>
                 <p className="text-gray-500">养成这些好习惯，让健康成为生活的一部分</p>
               </div>
-              
+
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="flex items-start gap-4">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -217,7 +217,7 @@ export function Health() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-4">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-green-600 font-bold text-sm">2</span>
@@ -229,7 +229,7 @@ export function Health() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-4">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-green-600 font-bold text-sm">3</span>
@@ -241,7 +241,7 @@ export function Health() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-4">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-green-600 font-bold text-sm">4</span>
@@ -253,7 +253,7 @@ export function Health() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-4">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-green-600 font-bold text-sm">5</span>
@@ -265,7 +265,7 @@ export function Health() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-4">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-green-600 font-bold text-sm">6</span>
@@ -283,5 +283,5 @@ export function Health() {
         )}
       </div>
     </div>
-  );
+  )
 }

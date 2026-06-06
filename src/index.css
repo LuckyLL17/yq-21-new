@@ -14,7 +14,7 @@
     --color-primary-700: #047857;
     --color-primary-800: #065f46;
     --color-primary-900: #064e3b;
-    
+
     --color-accent-50: #fff7ed;
     --color-accent-100: #ffedd5;
     --color-accent-200: #fed7aa;
@@ -26,19 +26,29 @@
     --color-accent-800: #9a3412;
     --color-accent-900: #7c2d12;
   }
-  
+
   html {
     font-family: 'Inter', sans-serif;
     scroll-behavior: smooth;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Poppins', sans-serif;
   }
 }
 
 @layer components {
   .gradient-bg {
-    background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-primary-100) 50%, var(--color-accent-50) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-50) 0%,
+      var(--color-primary-100) 50%,
+      var(--color-accent-50) 100%
+    );
   }
   .card-shadow {
     box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);

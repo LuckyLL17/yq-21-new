@@ -1,100 +1,103 @@
-import { useState, useRef, useEffect } from 'react';
-import { Search, X, Clock, TrendingUp, Trash2, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { findSnacksGroupedByCategory, getHotSearchKeywords, type Snack } from '../data/snacks';
-import { useSearchHistory } from '../utils/useSearchHistory';
+import { useState, useRef, useEffect } from 'react'
+import { Search, X, Clock, TrendingUp, Trash2, ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { findSnacksGroupedByCategory, getHotSearchKeywords, type Snack } from '../data/snacks'
+import { useSearchHistory } from '../utils/useSearchHistory'
 
 interface SearchBarProps {
-  variant?: 'hero' | 'normal';
+  variant?: 'hero' | 'normal'
 }
 
 function HighlightText({ text, keyword }: { text: string; keyword: string }) {
-  if (!keyword.trim()) return <span>{text}</span>;
-  
-  const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-  const parts = text.split(regex);
-  
+  if (!keyword.trim()) return <span>{text}</span>
+
+  const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+  const parts = text.split(regex)
+
   return (
     <span>
-      {parts.map((part, index) => 
+      {parts.map((part, index) =>
         part.toLowerCase() === keyword.toLowerCase() ? (
           <span key={index} className="text-primary-600 font-semibold bg-primary-50 px-0.5 rounded">
             {part}
           </span>
         ) : (
           <span key={index}>{part}</span>
-        )
+        ),
       )}
     </span>
-  );
+  )
 }
 
 export function SearchBar({ variant = 'hero' }: SearchBarProps) {
-  const [query, setQuery] = useState('');
-  const [groupedResults, setGroupedResults] = useState<Record<string, Snack[]>>({});
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [activeTab, setActiveTab] = useState<'history' | 'hot' | 'results'>('history');
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  
-  const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory();
-  const hotKeywords = getHotSearchKeywords();
+  const [query, setQuery] = useState('')
+  const [groupedResults, setGroupedResults] = useState<Record<string, Snack[]>>({})
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [activeTab, setActiveTab] = useState<'history' | 'hot' | 'results'>('history')
+  const inputRef = useRef<HTMLInputElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+
+  const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory()
+  const hotKeywords = getHotSearchKeywords()
 
   useEffect(() => {
     if (query.trim()) {
-      const results = findSnacksGroupedByCategory(query);
-      setGroupedResults(results);
-      setActiveTab('results');
+      const results = findSnacksGroupedByCategory(query)
+      setGroupedResults(results)
+      setActiveTab('results')
     } else {
-      setGroupedResults({});
-      setActiveTab('history');
+      setGroupedResults({})
+      setActiveTab('history')
     }
-  }, [query]);
+  }, [query])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
-        inputRef.current && 
+        inputRef.current &&
         !inputRef.current.contains(event.target as Node) &&
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
       ) {
-        setShowDropdown(false);
+        setShowDropdown(false)
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleSearch = (snack?: Snack) => {
     if (snack) {
-      addToHistory(snack.name);
-      navigate(`/snack/${snack.id}`);
+      addToHistory(snack.name)
+      navigate(`/snack/${snack.id}`)
     } else if (query.trim()) {
-      addToHistory(query);
+      addToHistory(query)
     }
-    setShowDropdown(false);
-    setQuery('');
-  };
+    setShowDropdown(false)
+    setQuery('')
+  }
 
   const handleKeywordClick = (keyword: string) => {
-    setQuery(keyword);
-    addToHistory(keyword);
-    inputRef.current?.focus();
-  };
+    setQuery(keyword)
+    addToHistory(keyword)
+    inputRef.current?.focus()
+  }
 
   const clearSearch = () => {
-    setQuery('');
-    setGroupedResults({});
-  };
+    setQuery('')
+    setGroupedResults({})
+  }
 
-  const totalResults = Object.values(groupedResults).reduce((sum, arr) => sum + arr.length, 0);
-  const isHero = variant === 'hero';
+  const totalResults = Object.values(groupedResults).reduce((sum, arr) => sum + arr.length, 0)
+  const isHero = variant === 'hero'
 
   return (
     <div className="relative w-full">
-      <div className={`relative flex items-center ${isHero ? 'h-14 md:h-16' : 'h-12'}`} ref={inputRef}>
+      <div
+        className={`relative flex items-center ${isHero ? 'h-14 md:h-16' : 'h-12'}`}
+        ref={inputRef}
+      >
         <Search className={`absolute left-4 ${isHero ? 'w-6 h-6' : 'w-5 h-5'} text-gray-400`} />
         <input
           type="text"
@@ -103,11 +106,11 @@ export function SearchBar({ variant = 'hero' }: SearchBarProps) {
           onFocus={() => setShowDropdown(true)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
-              const firstCategory = Object.keys(groupedResults)[0];
+              const firstCategory = Object.keys(groupedResults)[0]
               if (firstCategory && groupedResults[firstCategory].length > 0) {
-                handleSearch(groupedResults[firstCategory][0]);
+                handleSearch(groupedResults[firstCategory][0])
               } else {
-                handleSearch();
+                handleSearch()
               }
             }
           }}
@@ -127,7 +130,7 @@ export function SearchBar({ variant = 'hero' }: SearchBarProps) {
       </div>
 
       {showDropdown && (
-        <div 
+        <div
           ref={dropdownRef}
           className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
           style={{ maxHeight: '500px', overflowY: 'auto' }}
@@ -189,8 +192,8 @@ export function SearchBar({ variant = 'hero' }: SearchBarProps) {
                         </button>
                         <button
                           onClick={(e) => {
-                            e.stopPropagation();
-                            removeFromHistory(item);
+                            e.stopPropagation()
+                            removeFromHistory(item)
                           }}
                           className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                         >
@@ -219,15 +222,19 @@ export function SearchBar({ variant = 'hero' }: SearchBarProps) {
                     onClick={() => handleKeywordClick(item.keyword)}
                     className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-gray-50 rounded-xl transition-colors text-left"
                   >
-                    <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold ${
-                      index < 3 
-                        ? 'bg-gradient-to-br from-orange-400 to-red-500 text-white' 
-                        : 'bg-gray-100 text-gray-500'
-                    }`}>
+                    <span
+                      className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold ${
+                        index < 3
+                          ? 'bg-gradient-to-br from-orange-400 to-red-500 text-white'
+                          : 'bg-gray-100 text-gray-500'
+                      }`}
+                    >
                       {index + 1}
                     </span>
                     <span className="flex-1 text-gray-700 font-medium">{item.keyword}</span>
-                    <span className="text-xs text-gray-400">{item.count.toLocaleString()} 次搜索</span>
+                    <span className="text-xs text-gray-400">
+                      {item.count.toLocaleString()} 次搜索
+                    </span>
                     <ChevronRight className="w-4 h-4 text-gray-300" />
                   </button>
                 ))}
@@ -296,5 +303,5 @@ export function SearchBar({ variant = 'hero' }: SearchBarProps) {
         </div>
       )}
     </div>
-  );
+  )
 }

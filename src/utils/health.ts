@@ -3,25 +3,25 @@ export function getDailyCalorieNeeds(
   heightCm: number,
   age: number,
   gender: 'male' | 'female',
-  activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active'
+  activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active',
 ): number {
-  let bmr: number;
-  
+  let bmr: number
+
   if (gender === 'male') {
-    bmr = 88.362 + (13.397 * weightKg) + (4.799 * heightCm) - (5.677 * age);
+    bmr = 88.362 + 13.397 * weightKg + 4.799 * heightCm - 5.677 * age
   } else {
-    bmr = 447.593 + (9.247 * weightKg) + (3.098 * heightCm) - (4.330 * age);
+    bmr = 447.593 + 9.247 * weightKg + 3.098 * heightCm - 4.33 * age
   }
-  
+
   const activityMultipliers: Record<string, number> = {
-    'sedentary': 1.2,
-    'light': 1.375,
-    'moderate': 1.55,
-    'active': 1.725,
-    'very-active': 1.9
-  };
-  
-  return Math.round(bmr * activityMultipliers[activityLevel]);
+    sedentary: 1.2,
+    light: 1.375,
+    moderate: 1.55,
+    active: 1.725,
+    'very-active': 1.9,
+  }
+
+  return Math.round(bmr * activityMultipliers[activityLevel])
 }
 
 const HEALTH_TIPS = [
@@ -39,13 +39,13 @@ const HEALTH_TIPS = [
   '控制盐的摄入，每天不超过6g',
   '适量补充优质蛋白质，如鱼、蛋、奶、豆制品',
   '戒烟限酒，保护心脑血管健康',
-  '定期体检，及早发现和预防健康问题'
-];
+  '定期体检，及早发现和预防健康问题',
+]
 
 export function getHealthTipByIndex(index: number): string {
-  return HEALTH_TIPS[index % HEALTH_TIPS.length];
+  return HEALTH_TIPS[index % HEALTH_TIPS.length]
 }
 
 export function getHealthTipsCount(): number {
-  return HEALTH_TIPS.length;
+  return HEALTH_TIPS.length
 }

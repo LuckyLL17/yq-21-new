@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react'
 import {
   Trash2,
   Filter,
@@ -13,118 +13,108 @@ import {
   Droplets,
   Zap,
   Calendar,
-} from 'lucide-react';
-import type { CalorieRecord } from '../data/records';
-import {
-  getRecords,
-  deleteRecord,
-  getRecordsByDateRange,
-} from '../data/records';
-import { getCaloriesLevel } from '../utils/snack';
+} from 'lucide-react'
+import type { CalorieRecord } from '../data/records'
+import { getRecords, deleteRecord, getRecordsByDateRange } from '../data/records'
+import { getCaloriesLevel } from '../utils/snack'
 
 interface RecordListProps {
-  date?: string;
-  refreshTrigger?: number;
+  date?: string
+  refreshTrigger?: number
 }
 
 export function RecordList({ date, refreshTrigger }: RecordListProps) {
-  const [records, setRecords] = useState<CalorieRecord[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [showFilters, setShowFilters] = useState(false);
+  const [records, setRecords] = useState<CalorieRecord[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [showFilters, setShowFilters] = useState(false)
   const [dateRange, setDateRange] = useState({
     start: '',
     end: '',
-  });
-  const [selectedRecord, setSelectedRecord] = useState<CalorieRecord | null>(null);
+  })
+  const [selectedRecord, setSelectedRecord] = useState<CalorieRecord | null>(null)
 
   useEffect(() => {
-    loadRecords();
-  }, [date, dateRange, refreshTrigger]);
+    loadRecords()
+  }, [date, dateRange, refreshTrigger])
 
   const loadRecords = () => {
-    let loadedRecords: CalorieRecord[];
+    let loadedRecords: CalorieRecord[]
 
     if (dateRange.start && dateRange.end) {
-      loadedRecords = getRecordsByDateRange(dateRange.start, dateRange.end);
+      loadedRecords = getRecordsByDateRange(dateRange.start, dateRange.end)
     } else if (date) {
-      loadedRecords = getRecordsByDateRange(date, date);
+      loadedRecords = getRecordsByDateRange(date, date)
     } else {
-      loadedRecords = getRecords();
+      loadedRecords = getRecords()
     }
 
-    setRecords(loadedRecords);
-  };
+    setRecords(loadedRecords)
+  }
 
   const handleDelete = (id: string) => {
     if (confirm('确定要删除这条记录吗？')) {
-      deleteRecord(id);
-      loadRecords();
+      deleteRecord(id)
+      loadRecords()
       if (selectedRecord?.id === id) {
-        setSelectedRecord(null);
+        setSelectedRecord(null)
       }
     }
-  };
+  }
 
   const categories = useMemo(() => {
-    const cats = new Set<string>();
-    records.forEach((r) => cats.add(r.category));
-    return Array.from(cats);
-  }, [records]);
+    const cats = new Set<string>()
+    records.forEach((r) => cats.add(r.category))
+    return Array.from(cats)
+  }, [records])
 
   const filteredRecords = useMemo(() => {
-    let result = [...records];
+    let result = [...records]
 
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+      const query = searchQuery.toLowerCase()
       result = result.filter(
         (r) =>
           r.snackName.toLowerCase().includes(query) ||
           r.category.toLowerCase().includes(query) ||
-          r.notes?.toLowerCase().includes(query)
-      );
+          r.notes?.toLowerCase().includes(query),
+      )
     }
 
     if (categoryFilter !== 'all') {
-      result = result.filter((r) => r.category === categoryFilter);
+      result = result.filter((r) => r.category === categoryFilter)
     }
 
     result.sort((a, b) => {
-      const dateA = new Date(`${a.date} ${a.time}`);
-      const dateB = new Date(`${b.date} ${b.time}`);
+      const dateA = new Date(`${a.date} ${a.time}`)
+      const dateB = new Date(`${b.date} ${b.time}`)
       return sortOrder === 'desc'
         ? dateB.getTime() - dateA.getTime()
-        : dateA.getTime() - dateB.getTime();
-    });
+        : dateA.getTime() - dateB.getTime()
+    })
 
-    return result;
-  }, [records, searchQuery, categoryFilter, sortOrder]);
+    return result
+  }, [records, searchQuery, categoryFilter, sortOrder])
 
-  const totalCalories = filteredRecords.reduce((sum, r) => sum + r.calories, 0);
+  const totalCalories = filteredRecords.reduce((sum, r) => sum + r.calories, 0)
 
-  const closeModal = () => setSelectedRecord(null);
+  const closeModal = () => setSelectedRecord(null)
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="font-semibold text-lg text-gray-800">
-            摄入记录
-          </h3>
+          <h3 className="font-semibold text-lg text-gray-800">摄入记录</h3>
           <p className="text-sm text-gray-500">
             共 {filteredRecords.length} 条记录 ·{' '}
-            <span className="font-medium text-primary-600">
-              {totalCalories.toFixed(0)} kcal
-            </span>
+            <span className="font-medium text-primary-600">{totalCalories.toFixed(0)} kcal</span>
           </p>
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={`p-2 rounded-lg transition-colors ${
-            showFilters
-              ? 'bg-primary-100 text-primary-600'
-              : 'hover:bg-gray-100 text-gray-600'
+            showFilters ? 'bg-primary-100 text-primary-600' : 'hover:bg-gray-100 text-gray-600'
           }`}
         >
           <Filter className="w-5 h-5" />
@@ -146,28 +136,20 @@ export function RecordList({ date, refreshTrigger }: RecordListProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                开始日期
-              </label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">开始日期</label>
               <input
                 type="date"
                 value={dateRange.start}
-                onChange={(e) =>
-                  setDateRange((prev) => ({ ...prev, start: e.target.value }))
-                }
+                onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                结束日期
-              </label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">结束日期</label>
               <input
                 type="date"
                 value={dateRange.end}
-                onChange={(e) =>
-                  setDateRange((prev) => ({ ...prev, end: e.target.value }))
-                }
+                onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
@@ -175,9 +157,7 @@ export function RecordList({ date, refreshTrigger }: RecordListProps) {
 
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                分类筛选
-              </label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">分类筛选</label>
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
@@ -192,13 +172,9 @@ export function RecordList({ date, refreshTrigger }: RecordListProps) {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                排序
-              </label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">排序</label>
               <button
-                onClick={() =>
-                  setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))
-                }
+                onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
                 className="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50"
               >
                 {sortOrder === 'desc' ? (
@@ -206,9 +182,7 @@ export function RecordList({ date, refreshTrigger }: RecordListProps) {
                 ) : (
                   <ChevronUp className="w-4 h-4" />
                 )}
-                <span className="text-sm">
-                  {sortOrder === 'desc' ? '最新' : '最早'}
-                </span>
+                <span className="text-sm">{sortOrder === 'desc' ? '最新' : '最早'}</span>
               </button>
             </div>
           </div>
@@ -230,14 +204,12 @@ export function RecordList({ date, refreshTrigger }: RecordListProps) {
             <UtensilsCrossed className="w-10 h-10 text-gray-400" />
           </div>
           <p className="text-gray-500 font-medium">暂无记录</p>
-          <p className="text-sm text-gray-400 mt-1">
-            开始添加你的第一条热量记录吧
-          </p>
+          <p className="text-sm text-gray-400 mt-1">开始添加你的第一条热量记录吧</p>
         </div>
       ) : (
         <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
           {filteredRecords.map((record) => {
-            const level = getCaloriesLevel(record.calories);
+            const level = getCaloriesLevel(record.calories)
             return (
               <div
                 key={record.id}
@@ -276,14 +248,14 @@ export function RecordList({ date, refreshTrigger }: RecordListProps) {
                         <span className="text-sm font-normal ml-1">kcal</span>
                       </div>
                       <div className="text-xs text-gray-400 mt-1">
-                        P: {record.protein.toFixed(1)}g · F:{' '}
-                        {record.fat.toFixed(1)}g · C: {record.carbs.toFixed(1)}g
+                        P: {record.protein.toFixed(1)}g · F: {record.fat.toFixed(1)}g · C:{' '}
+                        {record.carbs.toFixed(1)}g
                       </div>
                     </div>
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(record.id);
+                        e.stopPropagation()
+                        handleDelete(record.id)
                       }}
                       className="p-2 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-100 text-gray-400 hover:text-red-500 transition-all"
                     >
@@ -292,17 +264,14 @@ export function RecordList({ date, refreshTrigger }: RecordListProps) {
                   </div>
                 </div>
               </div>
-            );
+            )
           })}
         </div>
       )}
 
       {selectedRecord && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={closeModal}
-          />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeModal} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="bg-gradient-to-r from-primary-500 to-accent-500 p-6 text-white">
               <div className="flex items-start justify-between">
@@ -411,5 +380,5 @@ export function RecordList({ date, refreshTrigger }: RecordListProps) {
         </div>
       )}
     </div>
-  );
+  )
 }

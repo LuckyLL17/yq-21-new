@@ -1,20 +1,20 @@
-import type { Snack } from '../data/snacks';
-import type { Exercise, ExerciseIntensity } from '../data/exercises';
-import { getIntensityLabel } from '../data/exercises';
-import { getExerciseComparison } from '../utils/exercise';
-import { formatEnergy, type EnergyUnit } from '../utils/energy';
-import { Info } from 'lucide-react';
+import type { Snack } from '../data/snacks'
+import type { Exercise, ExerciseIntensity } from '../data/exercises'
+import { getIntensityLabel } from '../data/exercises'
+import { getExerciseComparison } from '../utils/exercise'
+import { formatEnergy, type EnergyUnit } from '../utils/energy'
+import { Info } from 'lucide-react'
 
 interface ExerciseCardProps {
-  snack: Snack;
-  exercise: Exercise;
-  weight: number;
-  intensity?: ExerciseIntensity;
-  energyUnit?: EnergyUnit;
-  isMain?: boolean;
-  showIntensity?: boolean;
-  showRange?: boolean;
-  onIntensityChange?: (intensity: ExerciseIntensity) => void;
+  snack: Snack
+  exercise: Exercise
+  weight: number
+  intensity?: ExerciseIntensity
+  energyUnit?: EnergyUnit
+  isMain?: boolean
+  showIntensity?: boolean
+  showRange?: boolean
+  onIntensityChange?: (intensity: ExerciseIntensity) => void
 }
 
 export function ExerciseCard({
@@ -26,16 +26,16 @@ export function ExerciseCard({
   isMain = false,
   showIntensity = false,
   showRange = false,
-  onIntensityChange
+  onIntensityChange,
 }: ExerciseCardProps) {
-  const result = getExerciseComparison(snack, exercise, weight, intensity);
-  const Icon = exercise.icon;
+  const result = getExerciseComparison(snack, exercise, weight, intensity)
+  const Icon = exercise.icon
 
-  const intensities: ExerciseIntensity[] = ['low', 'medium', 'high'];
+  const intensities: ExerciseIntensity[] = ['low', 'medium', 'high']
 
   const handleIntensityClick = (newIntensity: ExerciseIntensity) => {
-    onIntensityChange?.(newIntensity);
-  };
+    onIntensityChange?.(newIntensity)
+  }
 
   if (isMain) {
     return (
@@ -50,13 +50,9 @@ export function ExerciseCard({
           </div>
         </div>
         <p className="text-center text-white/80 text-sm mb-2">消耗这些热量需要</p>
-        <p className="text-center font-poppins font-bold text-4xl mb-2">
-          {result.formatted}
-        </p>
-        <p className="text-center text-white/90 font-medium mb-4">
-          {getIntensityLabel(intensity)}
-        </p>
-        
+        <p className="text-center font-poppins font-bold text-4xl mb-2">{result.formatted}</p>
+        <p className="text-center text-white/90 font-medium mb-4">{getIntensityLabel(intensity)}</p>
+
         {showIntensity && onIntensityChange && (
           <div className="flex justify-center gap-2 mb-4">
             {intensities.map((level) => (
@@ -74,7 +70,7 @@ export function ExerciseCard({
             ))}
           </div>
         )}
-        
+
         {showRange && (
           <div className="text-center text-white/70 text-sm flex items-center justify-center gap-1">
             <Info className="w-4 h-4" />
@@ -85,7 +81,7 @@ export function ExerciseCard({
           </div>
         )}
       </div>
-    );
+    )
   }
 
   return (
@@ -105,5 +101,5 @@ export function ExerciseCard({
         </div>
       </div>
     </div>
-  );
+  )
 }

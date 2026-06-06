@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { Filter, X, ChevronDown, ChevronUp, Flame } from 'lucide-react';
-import { TAG_INFO, getAllCategories } from '../data/snacks';
-import { useCustomTags } from '../utils/useCustomTags';
+import { useState } from 'react'
+import { Filter, X, ChevronDown, ChevronUp, Flame } from 'lucide-react'
+import { TAG_INFO, getAllCategories } from '../data/snacks'
+import { useCustomTags } from '../utils/useCustomTags'
 
 interface AdvancedFilterProps {
-  selectedTags: string[];
-  selectedCategory: string;
-  minCalories?: number;
-  maxCalories?: number;
-  onTagsChange: (tags: string[]) => void;
-  onCategoryChange: (category: string) => void;
-  onCaloriesChange: (min?: number, max?: number) => void;
+  selectedTags: string[]
+  selectedCategory: string
+  minCalories?: number
+  maxCalories?: number
+  onTagsChange: (tags: string[]) => void
+  onCategoryChange: (category: string) => void
+  onCaloriesChange: (min?: number, max?: number) => void
 }
 
 export function AdvancedFilter({
@@ -22,55 +22,58 @@ export function AdvancedFilter({
   onCategoryChange,
   onCaloriesChange,
 }: AdvancedFilterProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const categories = ['全部', ...getAllCategories()];
-  const { customTags } = useCustomTags();
-  
+  const [isExpanded, setIsExpanded] = useState(false)
+  const categories = ['全部', ...getAllCategories()]
+  const { customTags } = useCustomTags()
+
   const calorieRanges = [
     { label: '全部', min: undefined, max: undefined },
     { label: '100以下', min: undefined, max: 100 },
     { label: '100-200', min: 100, max: 200 },
     { label: '200-400', min: 200, max: 400 },
     { label: '400以上', min: 400, max: undefined },
-  ];
+  ]
 
   const handleTagToggle = (tagId: string) => {
     if (selectedTags.includes(tagId)) {
-      onTagsChange(selectedTags.filter(t => t !== tagId));
+      onTagsChange(selectedTags.filter((t) => t !== tagId))
     } else {
-      onTagsChange([...selectedTags, tagId]);
+      onTagsChange([...selectedTags, tagId])
     }
-  };
+  }
 
   const clearAllFilters = () => {
-    onTagsChange([]);
-    onCategoryChange('全部');
-    onCaloriesChange(undefined, undefined);
-  };
+    onTagsChange([])
+    onCategoryChange('全部')
+    onCaloriesChange(undefined, undefined)
+  }
 
-  const activeFiltersCount = 
-    selectedTags.length + 
-    (selectedCategory !== '全部' ? 1 : 0) + 
-    ((minCalories !== undefined || maxCalories !== undefined) ? 1 : 0);
+  const activeFiltersCount =
+    selectedTags.length +
+    (selectedCategory !== '全部' ? 1 : 0) +
+    (minCalories !== undefined || maxCalories !== undefined ? 1 : 0)
 
   const getCurrentCalorieLabel = () => {
-    const range = calorieRanges.find(
-      r => r.min === minCalories && r.max === maxCalories
-    );
-    return range?.label || '自定义';
-  };
+    const range = calorieRanges.find((r) => r.min === minCalories && r.max === maxCalories)
+    return range?.label || '自定义'
+  }
 
   const getTagDisplayInfo = (tagId: string) => {
-    const systemTag = TAG_INFO.find(t => t.id === tagId);
+    const systemTag = TAG_INFO.find((t) => t.id === tagId)
     if (systemTag) {
-      return { name: systemTag.name, bgColor: systemTag.bgColor, color: systemTag.color, isCustom: false };
+      return {
+        name: systemTag.name,
+        bgColor: systemTag.bgColor,
+        color: systemTag.color,
+        isCustom: false,
+      }
     }
-    const customTag = customTags.find(t => t.id === tagId);
+    const customTag = customTags.find((t) => t.id === tagId)
     if (customTag) {
-      return { name: customTag.name, bgColor: '', color: customTag.color, isCustom: true };
+      return { name: customTag.name, bgColor: '', color: customTag.color, isCustom: true }
     }
-    return null;
-  };
+    return null
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
@@ -85,8 +88,8 @@ export function AdvancedFilter({
           <div className="text-left">
             <h3 className="font-semibold text-gray-800">高级筛选</h3>
             <p className="text-sm text-gray-500">
-              {activeFiltersCount > 0 
-                ? `已选择 ${activeFiltersCount} 个筛选条件` 
+              {activeFiltersCount > 0
+                ? `已选择 ${activeFiltersCount} 个筛选条件`
                 : '按标签、分类、热量范围筛选'}
             </p>
           </div>
@@ -95,8 +98,8 @@ export function AdvancedFilter({
           {activeFiltersCount > 0 && (
             <button
               onClick={(e) => {
-                e.stopPropagation();
-                clearAllFilters();
+                e.stopPropagation()
+                clearAllFilters()
               }}
               className="px-3 py-1.5 text-sm text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
             >
@@ -150,9 +153,7 @@ export function AdvancedFilter({
                       : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                   }`}
                 >
-                  {selectedTags.includes(tag.id) && (
-                    <X className="w-3.5 h-3.5" />
-                  )}
+                  {selectedTags.includes(tag.id) && <X className="w-3.5 h-3.5" />}
                   {tag.name}
                 </button>
               ))}
@@ -166,7 +167,7 @@ export function AdvancedFilter({
               </label>
               <div className="flex flex-wrap gap-2">
                 {customTags.map((tag) => {
-                  const isSelected = selectedTags.includes(tag.id);
+                  const isSelected = selectedTags.includes(tag.id)
                   return (
                     <button
                       key={tag.id}
@@ -178,12 +179,10 @@ export function AdvancedFilter({
                       }`}
                       style={{ backgroundColor: tag.color }}
                     >
-                      {isSelected && (
-                        <X className="w-3.5 h-3.5" />
-                      )}
+                      {isSelected && <X className="w-3.5 h-3.5" />}
                       {tag.name}
                     </button>
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -218,17 +217,14 @@ export function AdvancedFilter({
           {selectedCategory !== '全部' && (
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
               {selectedCategory}
-              <button
-                onClick={() => onCategoryChange('全部')}
-                className="hover:text-red-500 ml-1"
-              >
+              <button onClick={() => onCategoryChange('全部')} className="hover:text-red-500 ml-1">
                 <X className="w-3.5 h-3.5" />
               </button>
             </span>
           )}
           {selectedTags.map((tagId) => {
-            const tagInfo = getTagDisplayInfo(tagId);
-            if (!tagInfo) return null;
+            const tagInfo = getTagDisplayInfo(tagId)
+            if (!tagInfo) return null
             return (
               <span
                 key={tagId}
@@ -238,14 +234,11 @@ export function AdvancedFilter({
                 style={tagInfo.isCustom ? { backgroundColor: tagInfo.color } : {}}
               >
                 {tagInfo.name}
-                <button
-                  onClick={() => handleTagToggle(tagId)}
-                  className="hover:opacity-70 ml-1"
-                >
+                <button onClick={() => handleTagToggle(tagId)} className="hover:opacity-70 ml-1">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </span>
-            );
+            )
           })}
           {(minCalories !== undefined || maxCalories !== undefined) && (
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-sm">
@@ -261,5 +254,5 @@ export function AdvancedFilter({
         </div>
       )}
     </div>
-  );
+  )
 }

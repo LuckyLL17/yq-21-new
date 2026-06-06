@@ -1,31 +1,31 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
 export interface ThemeColors {
-  name: string;
+  name: string
   primary: {
-    50: string;
-    100: string;
-    200: string;
-    300: string;
-    400: string;
-    500: string;
-    600: string;
-    700: string;
-    800: string;
-    900: string;
-  };
+    50: string
+    100: string
+    200: string
+    300: string
+    400: string
+    500: string
+    600: string
+    700: string
+    800: string
+    900: string
+  }
   accent: {
-    50: string;
-    100: string;
-    200: string;
-    300: string;
-    400: string;
-    500: string;
-    600: string;
-    700: string;
-    800: string;
-    900: string;
-  };
+    50: string
+    100: string
+    200: string
+    300: string
+    400: string
+    500: string
+    600: string
+    700: string
+    800: string
+    900: string
+  }
 }
 
 export const themes: Record<string, ThemeColors> = {
@@ -137,47 +137,47 @@ export const themes: Record<string, ThemeColors> = {
       900: '#713f12',
     },
   },
-};
-
-const THEME_KEY = 'snack_calculator_theme';
-
-interface ThemeContextType {
-  currentTheme: string;
-  themeColors: ThemeColors;
-  setTheme: (themeName: string) => void;
-  themeNames: string[];
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const THEME_KEY = 'snack_calculator_theme'
+
+interface ThemeContextType {
+  currentTheme: string
+  themeColors: ThemeColors
+  setTheme: (themeName: string) => void
+  themeNames: string[]
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [currentTheme, setCurrentTheme] = useState<string>('green');
+  const [currentTheme, setCurrentTheme] = useState<string>('green')
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem(THEME_KEY);
+    const savedTheme = localStorage.getItem(THEME_KEY)
     if (savedTheme && themes[savedTheme]) {
-      setCurrentTheme(savedTheme);
+      setCurrentTheme(savedTheme)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    const theme = themes[currentTheme];
-    const root = document.documentElement;
-    
+    const theme = themes[currentTheme]
+    const root = document.documentElement
+
     Object.entries(theme.primary).forEach(([key, value]) => {
-      root.style.setProperty(`--color-primary-${key}`, value);
-    });
+      root.style.setProperty(`--color-primary-${key}`, value)
+    })
     Object.entries(theme.accent).forEach(([key, value]) => {
-      root.style.setProperty(`--color-accent-${key}`, value);
-    });
-  }, [currentTheme]);
+      root.style.setProperty(`--color-accent-${key}`, value)
+    })
+  }, [currentTheme])
 
   const setTheme = (themeName: string) => {
     if (themes[themeName]) {
-      setCurrentTheme(themeName);
-      localStorage.setItem(THEME_KEY, themeName);
+      setCurrentTheme(themeName)
+      localStorage.setItem(THEME_KEY, themeName)
     }
-  };
+  }
 
   return (
     <ThemeContext.Provider
@@ -190,13 +190,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     >
       {children}
     </ThemeContext.Provider>
-  );
+  )
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext);
+  const context = useContext(ThemeContext)
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error('useTheme must be used within a ThemeProvider')
   }
-  return context;
+  return context
 }

@@ -1,15 +1,15 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Header } from './components/Header';
-import { Home } from './pages/Home';
-import { SnackDetail } from './pages/SnackDetail';
-import { Records } from './pages/Records';
-import { Favorites } from './pages/Favorites';
-import { ExercisePlan } from './pages/ExercisePlan';
-import { Health } from './pages/Health';
-import { ThemeProvider } from './utils/ThemeContext';
-import { FavoritesProvider } from './utils/useFavorites';
-import { CustomTagsProvider } from './utils/useCustomTags';
-import './index.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Header } from './components/Header'
+import { Home } from './pages/Home'
+import { SnackDetail } from './pages/SnackDetail'
+import { Records } from './pages/Records'
+import { Favorites } from './pages/Favorites'
+import { ExercisePlan } from './pages/ExercisePlan'
+import { Health } from './pages/Health'
+import { ThemeProvider } from './utils/ThemeContext'
+import { FavoritesProvider } from './utils/useFavorites'
+import { CustomTagsProvider } from './utils/useCustomTags'
+import './index.css'
 
 function App() {
   return (
@@ -32,7 +32,7 @@ function App() {
         </FavoritesProvider>
       </CustomTagsProvider>
     </ThemeProvider>
-  );
+  )
 }
 
-export default App;
+export default App

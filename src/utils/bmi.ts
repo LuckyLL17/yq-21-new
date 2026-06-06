@@ -1,19 +1,19 @@
-export type BMICategory = 'underweight' | 'normal' | 'overweight' | 'obese' | 'severely-obese';
+export type BMICategory = 'underweight' | 'normal' | 'overweight' | 'obese' | 'severely-obese'
 
 export interface BMIResult {
-  bmi: number;
-  category: BMICategory;
-  categoryName: string;
-  color: string;
-  bgColor: string;
-  description: string;
-  suggestions: string[];
+  bmi: number
+  category: BMICategory
+  categoryName: string
+  color: string
+  bgColor: string
+  description: string
+  suggestions: string[]
 }
 
 export function calculateBMI(heightCm: number, weightKg: number): number {
-  if (heightCm <= 0 || weightKg <= 0) return 0;
-  const heightM = heightCm / 100;
-  return Math.round((weightKg / (heightM * heightM)) * 10) / 10;
+  if (heightCm <= 0 || weightKg <= 0) return 0
+  const heightM = heightCm / 100
+  return Math.round((weightKg / (heightM * heightM)) * 10) / 10
 }
 
 export function getBMICategory(bmi: number): BMIResult {
@@ -25,10 +25,10 @@ export function getBMICategory(bmi: number): BMIResult {
       color: 'text-gray-500',
       bgColor: 'bg-gray-100',
       description: '请输入有效的身高和体重',
-      suggestions: []
-    };
+      suggestions: [],
+    }
   }
-  
+
   if (bmi < 18.5) {
     return {
       bmi,
@@ -41,9 +41,9 @@ export function getBMICategory(bmi: number): BMIResult {
         '适当增加热量摄入，选择营养丰富的食物',
         '增加优质蛋白质摄入，如鸡蛋、牛奶、瘦肉',
         '配合力量训练，增加肌肉量',
-        '保持规律作息，避免过度劳累'
-      ]
-    };
+        '保持规律作息，避免过度劳累',
+      ],
+    }
   } else if (bmi < 24) {
     return {
       bmi,
@@ -56,9 +56,9 @@ export function getBMICategory(bmi: number): BMIResult {
         '保持均衡饮食，适量摄入各类营养素',
         '坚持规律运动，每周至少150分钟中等强度运动',
         '保持充足睡眠，每天7-8小时',
-        '定期体检，关注身体健康指标'
-      ]
-    };
+        '定期体检，关注身体健康指标',
+      ],
+    }
   } else if (bmi < 28) {
     return {
       bmi,
@@ -71,9 +71,9 @@ export function getBMICategory(bmi: number): BMIResult {
         '控制总热量摄入，减少高热量零食',
         '增加蔬菜水果摄入，保持饮食均衡',
         '增加有氧运动，如快走、慢跑、游泳',
-        '减少久坐时间，每小时起身活动'
-      ]
-    };
+        '减少久坐时间，每小时起身活动',
+      ],
+    }
   } else if (bmi < 32) {
     return {
       bmi,
@@ -87,9 +87,9 @@ export function getBMICategory(bmi: number): BMIResult {
         '控制碳水化合物和脂肪摄入',
         '坚持每天30-60分钟有氧运动',
         '可咨询专业营养师或医生的建议',
-        '保持积极心态，减重是一个循序渐进的过程'
-      ]
-    };
+        '保持积极心态，减重是一个循序渐进的过程',
+      ],
+    }
   } else {
     return {
       bmi,
@@ -103,16 +103,16 @@ export function getBMICategory(bmi: number): BMIResult {
         '在医生指导下制定科学的减重计划',
         '严格控制饮食，避免高热量食物',
         '选择适合自己的低强度运动开始',
-        '关注血糖、血压、血脂等健康指标'
-      ]
-    };
+        '关注血糖、血压、血脂等健康指标',
+      ],
+    }
   }
 }
 
 export function getIdealWeightRange(heightCm: number): { min: number; max: number } {
-  const heightM = heightCm / 100;
+  const heightM = heightCm / 100
   return {
     min: Math.round(18.5 * heightM * heightM * 10) / 10,
-    max: Math.round(23.9 * heightM * heightM * 10) / 10
-  };
+    max: Math.round(23.9 * heightM * heightM * 10) / 10,
+  }
 }

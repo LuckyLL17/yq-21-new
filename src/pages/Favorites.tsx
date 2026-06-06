@@ -1,16 +1,36 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Heart, Plus, Edit2, Trash2, ArrowUpDown, ChevronDown, Folder, Flame, Clock, SortAsc, SortDesc } from 'lucide-react';
-import { SnackCard } from '../components/SnackCard';
-import { useFavorites, type SortField } from '../utils/useFavorites';
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import {
+  Heart,
+  Plus,
+  Edit2,
+  Trash2,
+  ArrowUpDown,
+  ChevronDown,
+  Folder,
+  Flame,
+  Clock,
+  SortAsc,
+  SortDesc,
+} from 'lucide-react'
+import { SnackCard } from '../components/SnackCard'
+import { useFavorites, type SortField } from '../utils/useFavorites'
 
 const colorOptions = [
-  '#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6',
-  '#8B5CF6', '#EC4899', '#6B7280', '#14B8A6', '#F43F5E'
-];
+  '#EF4444',
+  '#F97316',
+  '#EAB308',
+  '#22C55E',
+  '#3B82F6',
+  '#8B5CF6',
+  '#EC4899',
+  '#6B7280',
+  '#14B8A6',
+  '#F43F5E',
+]
 
 export function Favorites() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const {
     favorites,
     categories,
@@ -21,60 +41,60 @@ export function Favorites() {
     addCategory,
     removeCategory,
     updateCategory,
-    getFavoritesByCategory
-  } = useFavorites();
+    getFavoritesByCategory,
+  } = useFavorites()
 
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [showAddCategory, setShowAddCategory] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<string | null>(null);
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [newCategoryColor, setNewCategoryColor] = useState(colorOptions[0]);
-  const [showSortMenu, setShowSortMenu] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [showAddCategory, setShowAddCategory] = useState(false)
+  const [editingCategory, setEditingCategory] = useState<string | null>(null)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [newCategoryColor, setNewCategoryColor] = useState(colorOptions[0])
+  const [showSortMenu, setShowSortMenu] = useState(false)
 
-  const filteredFavorites = getFavoritesByCategory(selectedCategory);
+  const filteredFavorites = getFavoritesByCategory(selectedCategory)
 
   const sortOptions: { field: SortField; label: string; icon: React.ReactNode }[] = [
     { field: 'favoritedAt', label: '收藏时间', icon: <Clock className="w-4 h-4" /> },
     { field: 'name', label: '名称', icon: <ArrowUpDown className="w-4 h-4" /> },
-    { field: 'calories', label: '热量', icon: <Flame className="w-4 h-4" /> }
-  ];
+    { field: 'calories', label: '热量', icon: <Flame className="w-4 h-4" /> },
+  ]
 
   const handleAddCategory = () => {
     if (newCategoryName.trim()) {
-      addCategory(newCategoryName.trim(), newCategoryColor);
-      setNewCategoryName('');
-      setNewCategoryColor(colorOptions[0]);
-      setShowAddCategory(false);
+      addCategory(newCategoryName.trim(), newCategoryColor)
+      setNewCategoryName('')
+      setNewCategoryColor(colorOptions[0])
+      setShowAddCategory(false)
     }
-  };
+  }
 
   const handleUpdateCategory = (categoryId: string) => {
     if (newCategoryName.trim()) {
-      updateCategory(categoryId, newCategoryName.trim(), newCategoryColor);
-      setNewCategoryName('');
-      setNewCategoryColor(colorOptions[0]);
-      setEditingCategory(null);
+      updateCategory(categoryId, newCategoryName.trim(), newCategoryColor)
+      setNewCategoryName('')
+      setNewCategoryColor(colorOptions[0])
+      setEditingCategory(null)
     }
-  };
+  }
 
   const startEditCategory = (categoryId: string) => {
-    const category = categories.find(c => c.id === categoryId);
+    const category = categories.find((c) => c.id === categoryId)
     if (category) {
-      setNewCategoryName(category.name);
-      setNewCategoryColor(category.color);
-      setEditingCategory(categoryId);
+      setNewCategoryName(category.name)
+      setNewCategoryColor(category.color)
+      setEditingCategory(categoryId)
     }
-  };
+  }
 
   const cancelEdit = () => {
-    setEditingCategory(null);
-    setNewCategoryName('');
-    setNewCategoryColor(colorOptions[0]);
-  };
+    setEditingCategory(null)
+    setNewCategoryName('')
+    setNewCategoryColor(colorOptions[0])
+  }
 
   const toggleSortOrder = () => {
-    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-  };
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -88,9 +108,7 @@ export function Favorites() {
               <h1 className="font-poppins text-2xl md:text-3xl font-bold text-gray-800">
                 我的收藏
               </h1>
-              <p className="text-gray-500">
-                共收藏 {favorites.length} 款零食
-              </p>
+              <p className="text-gray-500">共收藏 {favorites.length} 款零食</p>
             </div>
           </div>
         </div>
@@ -124,7 +142,9 @@ export function Favorites() {
                         key={color}
                         onClick={() => setNewCategoryColor(color)}
                         className={`w-6 h-6 rounded-full transition-transform ${
-                          newCategoryColor === color ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : ''
+                          newCategoryColor === color
+                            ? 'ring-2 ring-offset-2 ring-gray-400 scale-110'
+                            : ''
                         }`}
                         style={{ backgroundColor: color }}
                       />
@@ -139,8 +159,8 @@ export function Favorites() {
                     </button>
                     <button
                       onClick={() => {
-                        setShowAddCategory(false);
-                        setNewCategoryName('');
+                        setShowAddCategory(false)
+                        setNewCategoryName('')
                       }}
                       className="px-3 py-2 bg-gray-200 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
                     >
@@ -169,7 +189,9 @@ export function Favorites() {
                               key={color}
                               onClick={() => setNewCategoryColor(color)}
                               className={`w-6 h-6 rounded-full transition-transform ${
-                                newCategoryColor === color ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : ''
+                                newCategoryColor === color
+                                  ? 'ring-2 ring-offset-2 ring-gray-400 scale-110'
+                                  : ''
                               }`}
                               style={{ backgroundColor: color }}
                             />
@@ -206,15 +228,19 @@ export function Favorites() {
                           />
                           <span className="font-medium text-sm">{category.name}</span>
                           <span className="text-xs text-gray-400">
-                            ({category.id === 'all' ? favorites.length : getFavoritesByCategory(category.id).length})
+                            (
+                            {category.id === 'all'
+                              ? favorites.length
+                              : getFavoritesByCategory(category.id).length}
+                            )
                           </span>
                         </div>
                         {category.id !== 'all' && (
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={(e) => {
-                                e.stopPropagation();
-                                startEditCategory(category.id);
+                                e.stopPropagation()
+                                startEditCategory(category.id)
                               }}
                               className="p-1 rounded hover:bg-gray-200"
                             >
@@ -222,11 +248,11 @@ export function Favorites() {
                             </button>
                             <button
                               onClick={(e) => {
-                                e.stopPropagation();
+                                e.stopPropagation()
                                 if (confirm('确定要删除这个分类吗？')) {
-                                  removeCategory(category.id);
+                                  removeCategory(category.id)
                                   if (selectedCategory === category.id) {
-                                    setSelectedCategory('all');
+                                    setSelectedCategory('all')
                                   }
                                 }
                               }}
@@ -247,10 +273,8 @@ export function Favorites() {
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-semibold text-gray-800">
-                {categories.find(c => c.id === selectedCategory)?.name || '全部收藏'}
-                <span className="text-gray-400 font-normal ml-2">
-                  ({filteredFavorites.length})
-                </span>
+                {categories.find((c) => c.id === selectedCategory)?.name || '全部收藏'}
+                <span className="text-gray-400 font-normal ml-2">({filteredFavorites.length})</span>
               </h2>
 
               <div className="relative">
@@ -271,7 +295,7 @@ export function Favorites() {
                     className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors"
                   >
                     <span className="text-sm font-medium">
-                      {sortOptions.find(o => o.field === sortField)?.label}
+                      {sortOptions.find((o) => o.field === sortField)?.label}
                     </span>
                     <ChevronDown className="w-4 h-4" />
                   </button>
@@ -279,17 +303,14 @@ export function Favorites() {
 
                 {showSortMenu && (
                   <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setShowSortMenu(false)}
-                    />
+                    <div className="fixed inset-0 z-40" onClick={() => setShowSortMenu(false)} />
                     <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                       {sortOptions.map((option) => (
                         <button
                           key={option.field}
                           onClick={() => {
-                            setSortField(option.field);
-                            setShowSortMenu(false);
+                            setSortField(option.field)
+                            setShowSortMenu(false)
                           }}
                           className={`w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 transition-colors ${
                             sortField === option.field
@@ -338,5 +359,5 @@ export function Favorites() {
         </div>
       </div>
     </div>
-  );
+  )
 }
