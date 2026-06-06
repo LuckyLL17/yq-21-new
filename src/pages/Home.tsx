@@ -4,7 +4,7 @@ import { Flame, Zap, Heart, ArrowRight, Info, Clock, ChevronLeft, ChevronRight, 
 import { SearchBar } from '../components/SearchBar';
 import { SnackCard } from '../components/SnackCard';
 import { AdvancedFilter } from '../components/AdvancedFilter';
-import { findSnackByName, getAllCategories, filterSnacks, type SnackTag, snacks } from '../data/snacks';
+import { findSnackByName, getAllCategories, filterSnacks, type SnackTag } from '../data/snacks';
 import { useBrowsingHistory } from '../utils/useBrowsingHistory';
 import { useCustomTags } from '../utils/useCustomTags';
 

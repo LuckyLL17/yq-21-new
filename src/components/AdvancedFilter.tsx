@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Filter, X, ChevronDown, ChevronUp, Flame } from 'lucide-react';
-import { TAG_INFO, type SnackTag, getAllCategories } from '../data/snacks';
+import { TAG_INFO, getAllCategories } from '../data/snacks';
 import { useCustomTags } from '../utils/useCustomTags';
 
 interface AdvancedFilterProps {

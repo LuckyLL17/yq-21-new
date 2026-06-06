@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import type { SnackTag } from '../data/snacks';
 
 export interface CustomTag {
   id: string;

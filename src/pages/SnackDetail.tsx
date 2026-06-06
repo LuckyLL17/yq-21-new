@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Flame, Scale, Droplets, Wheat, ArrowLeft, Lightbulb, Dumbbell, User, X, Download, ChevronDown, Heart, Folder, Check, Tag, Plus, Edit2, Trash2, Zap, RefreshCw, Settings } from 'lucide-react';
+import { Flame, Scale, Droplets, Wheat, ArrowLeft, Lightbulb, Dumbbell, User, X, Download, ChevronDown, Heart, Folder, Check, Tag, Plus, Edit2, Trash2, Zap, RefreshCw, Settings, Save, TrendingUp, TrendingDown, Equal } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import html2canvas from 'html2canvas';
 import { getSnackById, getAlternatives, TAG_INFO, getTagInfo, type AlternativeRecommendation } from '../data/snacks';
@@ -14,6 +14,15 @@ import { AlternativeCard } from '../components/AlternativeCard';
 import { useBrowsingHistory } from '../utils/useBrowsingHistory';
 import { useFavorites } from '../utils/useFavorites';
 import { useCustomTags } from '../utils/useCustomTags';
+import { useServingPresets } from '../utils/useServingPresets';
+import {
+  calculateNutritionByWeight,
+  getSliderRange,
+  getQuickAdjustOptions,
+  formatNutritionValue,
+  getUnitsFromWeight,
+  type NutritionInfo,
+} from '../utils/serving';
 
 export function SnackDetail() {
   const { id } = useParams<{ id: string }>();
@@ -32,8 +41,14 @@ export function SnackDetail() {
   const [refreshSeed, setRefreshSeed] = useState(Date.now());
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showCountMenu, setShowCountMenu] = useState(false);
+  const [currentWeightGrams, setCurrentWeightGrams] = useState<number | null>(null);
+  const [showPresetMenu, setShowPresetMenu] = useState(false);
+  const [showSavePresetModal, setShowSavePresetModal] = useState(false);
+  const [newPresetName, setNewPresetName] = useState('');
+  const [servingUnitMode, setServingUnitMode] = useState<'weight' | 'unit'>('weight');
   const contentRef = useRef<HTMLDivElement>(null);
   const countMenuRef = useRef<HTMLDivElement>(null);
+  const presetMenuRef = useRef<HTMLDivElement>(null);
   const { addToHistory } = useBrowsingHistory();
   const { isFavorite, toggleFavorite, categories, setSnackCategories, favorites } = useFavorites();
   const { 
@@ -43,11 +58,70 @@ export function SnackDetail() {
     updateCustomTag,
     getSnackTags, 
     toggleTagOnSnack,
-    hasTagOnSnack,
     defaultColors 
   } = useCustomTags();
   
   const snack = id ? getSnackById(id) : undefined;
+  
+  const { presets, addPreset, removePreset } = useServingPresets(snack);
+
+  const effectiveWeight = currentWeightGrams ?? snack?.baseWeightGrams ?? 100;
+
+  const currentNutrition: NutritionInfo = useMemo(() => {
+    if (!snack) return { calories: 0, protein: 0, fat: 0, carbs: 0 };
+    return calculateNutritionByWeight(snack, effectiveWeight);
+  }, [snack, effectiveWeight]);
+
+  const baseNutrition: NutritionInfo = useMemo(() => {
+    if (!snack) return { calories: 0, protein: 0, fat: 0, carbs: 0 };
+    return calculateNutritionByWeight(snack, snack.baseWeightGrams);
+  }, [snack]);
+
+  const caloriesDiff = currentNutrition.calories - baseNutrition.calories;
+  const caloriesDiffPercent = baseNutrition.calories > 0 
+    ? ((currentNutrition.calories - baseNutrition.calories) / baseNutrition.calories) * 100 
+    : 0;
+
+  const sliderRange = snack ? getSliderRange(snack) : { min: 1, max: 500, step: 1 };
+  const quickAdjustOptions = getQuickAdjustOptions();
+  const currentUnits = snack ? getUnitsFromWeight(snack, effectiveWeight) : 1;
+
+  const currentCaloriesLevel = getCaloriesLevel(currentNutrition.calories);
+
+  const handleWeightChange = (weight: number) => {
+    setCurrentWeightGrams(Math.max(sliderRange.min, Math.min(sliderRange.max, weight)));
+  };
+
+  const handleQuickAdjust = (multiplier: number) => {
+    if (!snack) return;
+    const newWeight = snack.baseWeightGrams * multiplier;
+    setCurrentWeightGrams(newWeight);
+  };
+
+  const handlePresetSelect = (weightGrams: number) => {
+    setCurrentWeightGrams(weightGrams);
+    setShowPresetMenu(false);
+  };
+
+  const handleSavePreset = () => {
+    if (!newPresetName.trim()) return;
+    addPreset(newPresetName.trim(), effectiveWeight);
+    setNewPresetName('');
+    setShowSavePresetModal(false);
+  };
+
+  const handleRemovePreset = (presetId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('确定要删除这个预设吗？')) {
+      removePreset(presetId);
+    }
+  };
+
+  const handleResetWeight = () => {
+    if (snack) {
+      setCurrentWeightGrams(snack.baseWeightGrams);
+    }
+  };
   
   const alternatives: AlternativeRecommendation[] = useMemo(() => {
     if (!snack) return [];
@@ -67,7 +141,6 @@ export function SnackDetail() {
 
   const countOptions = [3, 5, 8, 10];
   const allExercises = getAllExercises();
-  const caloriesLevel = snack ? getCaloriesLevel(snack.calories) : null;
   const favorited = snack ? isFavorite(snack.id) : false;
   const favoriteItem = snack ? favorites.find(f => f.snackId === snack.id) : null;
   const selectedCategoryIds = favoriteItem?.categoryIds || [];
@@ -131,10 +204,6 @@ export function SnackDetail() {
   };
 
   const snackCustomTagIds = snack ? getSnackTags(snack.id) : [];
-  const allTags = [
-    ...TAG_INFO.map(t => ({ id: t.id, name: t.name, color: '', bgColor: '', isSystem: true })),
-    ...customTags.map(t => ({ id: t.id, name: t.name, color: t.color, bgColor: '', isSystem: false })),
-  ];
 
   if (!snack) {
     return (
@@ -174,9 +243,9 @@ export function SnackDetail() {
   const emoji = categoryEmojis[snack.category] || '🍴';
 
   const nutritionData = [
-    { name: '蛋白质', value: snack.protein * 4, color: '#F97316' },
-    { name: '脂肪', value: snack.fat * 9, color: '#EAB308' },
-    { name: '碳水化合物', value: snack.carbs * 4, color: '#3B82F6' },
+    { name: '蛋白质', value: currentNutrition.protein * 4, color: '#F97316' },
+    { name: '脂肪', value: currentNutrition.fat * 9, color: '#EAB308' },
+    { name: '碳水化合物', value: currentNutrition.carbs * 4, color: '#3B82F6' },
   ];
 
   const handleGenerateImage = async () => {
@@ -300,29 +369,49 @@ export function SnackDetail() {
                     <h1 className="font-poppins text-2xl md:text-3xl font-bold text-gray-800">
                       {snack.name}
                     </h1>
-                    <p className="text-gray-500 mt-1">{snack.servingSize}</p>
+                    <p className="text-gray-500 mt-1">
+                      标准份量：{snack.servingSize}
+                      {caloriesDiff !== 0 && (
+                        <span className={`ml-2 text-sm font-medium ${caloriesDiff > 0 ? 'text-orange-500' : 'text-green-500'}`}>
+                          (当前 {caloriesDiff > 0 ? '+' : ''}{formatNutritionValue(caloriesDiff)} 千卡)
+                        </span>
+                      )}
+                    </p>
                   </div>
                   <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    caloriesLevel?.level === '低' ? 'bg-green-100 text-green-600' :
-                    caloriesLevel?.level === '中低' ? 'bg-emerald-100 text-emerald-600' :
-                    caloriesLevel?.level === '中' ? 'bg-yellow-100 text-yellow-600' :
-                    caloriesLevel?.level === '高' ? 'bg-orange-100 text-orange-600' :
+                    currentCaloriesLevel?.level === '低' ? 'bg-green-100 text-green-600' :
+                    currentCaloriesLevel?.level === '中低' ? 'bg-emerald-100 text-emerald-600' :
+                    currentCaloriesLevel?.level === '中' ? 'bg-yellow-100 text-yellow-600' :
+                    currentCaloriesLevel?.level === '高' ? 'bg-orange-100 text-orange-600' :
                     'bg-red-100 text-red-600'
                   }`}>
-                    {caloriesLevel?.level}热量
+                    {currentCaloriesLevel?.level}热量
                   </span>
                 </div>
                 
-                <div className="flex items-baseline gap-2 mb-4">
+                <div className="flex items-baseline gap-2 mb-2">
                   <Flame className="w-8 h-8 text-orange-500" />
                   <span className="font-poppins text-4xl font-bold text-gray-800">
-                    {snack.calories}
+                    {formatNutritionValue(currentNutrition.calories)}
                   </span>
                   <span className="text-xl text-gray-500">千卡</span>
                 </div>
+
+                {caloriesDiff !== 0 && (
+                  <div className={`flex items-center gap-2 mb-4 text-sm font-medium`}>
+                    {caloriesDiff > 0 ? (
+                      <TrendingUp className="w-4 h-4 text-orange-500" />
+                    ) : (
+                      <TrendingDown className="w-4 h-4 text-green-500" />
+                    )}
+                    <span className={caloriesDiff > 0 ? 'text-orange-500' : 'text-green-500'}>
+                      比标准份量{caloriesDiff > 0 ? '多' : '少'} {formatNutritionValue(Math.abs(caloriesDiff))} 千卡 ({caloriesDiffPercent > 0 ? '+' : ''}{caloriesDiffPercent.toFixed(1)}%)
+                    </span>
+                  </div>
+                )}
                 
-                <p className={`text-base ${caloriesLevel?.color} font-medium mb-6`}>
-                  {caloriesLevel?.message}
+                <p className={`text-base ${currentCaloriesLevel?.color} font-medium mb-6`}>
+                  {currentCaloriesLevel?.message}
                 </p>
                 
                 <div className="grid grid-cols-3 gap-4">
@@ -330,26 +419,237 @@ export function SnackDetail() {
                     <div className="w-10 h-10 mx-auto rounded-xl bg-orange-100 flex items-center justify-center mb-2">
                       <Dumbbell className="w-5 h-5 text-orange-600" />
                     </div>
-                    <p className="font-poppins text-xl font-bold text-gray-800">{snack.protein}g</p>
+                    <p className="font-poppins text-xl font-bold text-gray-800">{formatNutritionValue(currentNutrition.protein)}g</p>
                     <p className="text-xs text-gray-500">蛋白质</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-2xl text-center">
                     <div className="w-10 h-10 mx-auto rounded-xl bg-yellow-100 flex items-center justify-center mb-2">
                       <Droplets className="w-5 h-5 text-yellow-600" />
                     </div>
-                    <p className="font-poppins text-xl font-bold text-gray-800">{snack.fat}g</p>
+                    <p className="font-poppins text-xl font-bold text-gray-800">{formatNutritionValue(currentNutrition.fat)}g</p>
                     <p className="text-xs text-gray-500">脂肪</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-2xl text-center">
                     <div className="w-10 h-10 mx-auto rounded-xl bg-blue-100 flex items-center justify-center mb-2">
                       <Wheat className="w-5 h-5 text-blue-600" />
                     </div>
-                    <p className="font-poppins text-xl font-bold text-gray-800">{snack.carbs}g</p>
+                    <p className="font-poppins text-xl font-bold text-gray-800">{formatNutritionValue(currentNutrition.carbs)}g</p>
                     <p className="text-xs text-gray-500">碳水化合物</p>
                   </div>
                 </div>
               </div>
             </div>
+
+            <div className="mt-8 pt-6 border-t border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-poppins text-lg font-bold text-gray-800 flex items-center gap-2">
+                  <Scale className="w-5 h-5 text-primary-500" />
+                  份量调整
+                </h3>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                    <button
+                      onClick={() => setServingUnitMode('weight')}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                        servingUnitMode === 'weight'
+                          ? 'bg-white text-primary-600 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      按重量
+                    </button>
+                    <button
+                      onClick={() => setServingUnitMode('unit')}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                        servingUnitMode === 'unit'
+                          ? 'bg-white text-primary-600 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      按{snack?.unitLabel || '份'}
+                    </button>
+                  </div>
+                  <button
+                    onClick={handleResetWeight}
+                    className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    重置
+                  </button>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">
+                    当前份量：
+                    <span className="font-semibold text-gray-800">
+                      {servingUnitMode === 'weight' 
+                        ? `${Math.round(effectiveWeight)} g`
+                        : `${currentUnits.toFixed(2)} ${snack?.unitLabel || '份'}`
+                      }
+                    </span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <div className="relative" ref={presetMenuRef}>
+                      <button
+                        onClick={() => setShowPresetMenu(!showPresetMenu)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        <Settings className="w-4 h-4" />
+                        预设
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      
+                      {showPresetMenu && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setShowPresetMenu(false)}
+                          />
+                          <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 max-h-80 overflow-y-auto">
+                            <div className="px-4 py-2 border-b border-gray-100">
+                              <p className="text-xs font-medium text-gray-500">常用份量</p>
+                            </div>
+                            {presets.map((preset) => (
+                              <button
+                                key={preset.id}
+                                onClick={() => handlePresetSelect(preset.weightGrams)}
+                                className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center justify-between transition-colors group"
+                              >
+                                <div>
+                                  <p className="text-sm font-medium text-gray-800">{preset.name}</p>
+                                  <p className="text-xs text-gray-500">{Math.round(preset.weightGrams)}g · {formatNutritionValue(calculateNutritionByWeight(snack!, preset.weightGrams).calories)} 千卡</p>
+                                </div>
+                                {!(preset as any).isDefault && (
+                                  <button
+                                    onClick={(e) => handleRemovePreset(preset.id, e)}
+                                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </button>
+                            ))}
+                            {presets.length === 0 && (
+                              <div className="px-4 py-3 text-center text-sm text-gray-500">
+                                暂无预设
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setShowSavePresetModal(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-100 text-primary-700 text-sm font-medium rounded-lg hover:bg-primary-200 transition-colors"
+                    >
+                      <Save className="w-4 h-4" />
+                      保存
+                    </button>
+                  </div>
+                </div>
+
+                <input
+                  type="range"
+                  min={sliderRange.min}
+                  max={sliderRange.max}
+                  step={sliderRange.step}
+                  value={servingUnitMode === 'weight' ? effectiveWeight : currentUnits}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (servingUnitMode === 'weight') {
+                      handleWeightChange(value);
+                    } else {
+                      setCurrentWeightGrams(snack!.baseWeightGrams * value);
+                    }
+                  }}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>{sliderRange.min}g</span>
+                  <span>{Math.round(sliderRange.max / 2)}g</span>
+                  <span>{sliderRange.max}g</span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 mb-4">
+                {quickAdjustOptions.map((option) => (
+                  <button
+                    key={option.label}
+                    onClick={() => handleQuickAdjust(option.multiplier)}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                      Math.abs(currentUnits - option.multiplier) < 0.01
+                        ? 'bg-primary-500 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 flex-1">
+                  <input
+                    type="number"
+                    value={servingUnitMode === 'weight' ? Math.round(effectiveWeight) : currentUnits.toFixed(2)}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      if (servingUnitMode === 'weight') {
+                        handleWeightChange(value);
+                      } else {
+                        setCurrentWeightGrams(snack!.baseWeightGrams * Math.max(0.01, value));
+                      }
+                    }}
+                    className="w-24 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-center focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    min={sliderRange.min}
+                    max={sliderRange.max}
+                    step={sliderRange.step}
+                  />
+                  <span className="text-sm text-gray-500">
+                    {servingUnitMode === 'weight' ? '克 (g)' : `${snack?.unitLabel || '份'}`}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {caloriesDiff !== 0 && (
+              <div className="mt-6 p-5 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl">
+                <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <Equal className="w-5 h-5 text-primary-500" />
+                  热量对比
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-white rounded-xl">
+                    <p className="text-sm text-gray-500 mb-1">标准份量</p>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {formatNutritionValue(baseNutrition.calories)}
+                      <span className="text-sm font-normal text-gray-500 ml-1">千卡</span>
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">{snack?.baseWeightGrams}g</p>
+                  </div>
+                  <div className={`p-4 rounded-xl ${caloriesDiff > 0 ? 'bg-orange-50' : 'bg-green-50'}`}>
+                    <p className="text-sm text-gray-500 mb-1">当前份量</p>
+                    <p className={`text-2xl font-bold ${caloriesDiff > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                      {formatNutritionValue(currentNutrition.calories)}
+                      <span className="text-sm font-normal text-gray-500 ml-1">千卡</span>
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">{Math.round(effectiveWeight)}g</p>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">差异</span>
+                    <span className={`font-semibold ${caloriesDiff > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                      {caloriesDiff > 0 ? '+' : ''}{formatNutritionValue(caloriesDiff)} 千卡
+                      <span className="text-gray-400 font-normal ml-1">
+                        ({caloriesDiffPercent > 0 ? '+' : ''}{caloriesDiffPercent.toFixed(1)}%)
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
             
             <div className="mt-8 pt-6 border-t border-gray-100">
               <div className="flex items-center justify-between mb-4">
@@ -650,7 +950,7 @@ export function SnackDetail() {
             
             <div className="mb-6">
               <ExerciseCard
-                snack={snack}
+                snack={{ ...snack, calories: currentNutrition.calories, servingSize: `${Math.round(effectiveWeight)}g` }}
                 exercise={allExercises[0]}
                 weight={weight}
                 intensity={intensity}
@@ -664,7 +964,7 @@ export function SnackDetail() {
               {allExercises.slice(1, 6).map((exercise) => (
                 <ExerciseCard
                   key={exercise.id}
-                  snack={snack}
+                  snack={{ ...snack, calories: currentNutrition.calories, servingSize: `${Math.round(effectiveWeight)}g` }}
                   exercise={exercise}
                   weight={weight}
                   intensity={intensity}
@@ -771,6 +1071,59 @@ export function SnackDetail() {
         </div>
       </div>
 
+      {showSavePresetModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-lg text-gray-800">保存份量预设</h3>
+              <button
+                onClick={() => setShowSavePresetModal(false)}
+                className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              >
+                <X className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
+            <div className="mb-4">
+              <p className="text-sm text-gray-500 mb-2">当前份量</p>
+              <p className="text-lg font-semibold text-gray-800">
+                {Math.round(effectiveWeight)}g · {formatNutritionValue(currentNutrition.calories)} 千卡
+              </p>
+            </div>
+            <div className="mb-4">
+              <label className="text-sm text-gray-600 mb-1.5 block">预设名称</label>
+              <input
+                type="text"
+                value={newPresetName}
+                onChange={(e) => setNewPresetName(e.target.value)}
+                placeholder="例如：下午茶份量"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-200"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSavePreset();
+                  }
+                }}
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowSavePresetModal(false)}
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleSavePreset}
+                disabled={!newPresetName.trim()}
+                className="flex-1 px-4 py-2.5 bg-primary-500 text-white font-medium rounded-xl hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                保存
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showAllExercises && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl p-6 md:p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
@@ -785,8 +1138,8 @@ export function SnackDetail() {
                   </h2>
                   <p className="text-sm text-gray-500">
                     {energyUnit === 'kJ' 
-                      ? `消耗约 ${Math.round(kcalToKj(snack.calories))} 千焦所需时间`
-                      : `消耗 ${snack.calories} 千卡所需时间`
+                      ? `消耗约 ${Math.round(kcalToKj(currentNutrition.calories))} 千焦所需时间`
+                      : `消耗 ${formatNutritionValue(currentNutrition.calories)} 千卡所需时间`
                     }
                   </p>
                 </div>
@@ -863,7 +1216,7 @@ export function SnackDetail() {
               {allExercises.map((exercise) => (
                 <ExerciseCard
                   key={exercise.id}
-                  snack={snack}
+                  snack={{ ...snack, calories: currentNutrition.calories, servingSize: `${Math.round(effectiveWeight)}g` }}
                   exercise={exercise}
                   weight={weight}
                   intensity={intensity}
